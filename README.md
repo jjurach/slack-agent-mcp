@@ -202,9 +202,9 @@ MCP Tool Call: send_slack_success("🚀 Production deployment completed successf
 
 See [doc/mcp-service-setup.md](doc/mcp-service-setup.md) for detailed setup and usage instructions.
 
-## Real-Time Slack Agent
+## Slack Agent
 
-The project includes a real-time Slack bot that connects via RTM and responds to time queries with current CST time.
+The project includes a Slack bot that monitors channels using the Web API and responds to time queries with current CST time.
 
 ### Running the Slack Agent
 
@@ -213,19 +213,37 @@ export SLACK_BOT_TOKEN="xoxb-your-bot-token-here"
 python slack_agent.py
 ```
 
+### Configuration
+
+The Slack Agent supports additional configuration:
+
+```bash
+# Optional: Comma-separated list of channel IDs to monitor
+export SLACK_AGENT_CHANNELS="C1234567890,C0987654321"
+
+# Optional: Polling interval in seconds (default: 5)
+export SLACK_AGENT_POLL_INTERVAL=5
+```
+
+If `SLACK_AGENT_CHANNELS` is not set, the agent will automatically discover and monitor channels with "general" in their name.
+
 ### Time Query Responses
 
-The agent responds to messages containing time-related queries:
+The agent responds to exact time-related queries:
 
 - "what time is it" → "The current time is 11:00:00 AM CST on 2025-12-25"
 - "what's the time?" → Same response
 - "time" → Same response
+- "current time" → Same response
 
 ### Logging
 
 All interactions are logged to stdout with CST timestamps:
 
 ```
+2025-12-25 11:00:00 CST - slack_agent - INFO - [2025-12-25 11:00:00 CST] Starting Slack Agent...
+2025-12-25 11:00:00 CST - slack_agent - INFO - Bot authenticated as user: U1234567890
+2025-12-25 11:00:00 CST - slack_agent - INFO - Monitoring channels: C1234567890
 2025-12-25 11:00:00 CST - slack_agent - INFO - [2025-12-25 11:00:00 CST] MESSAGE - Channel: C1234567890, User: U1234567890, Text: 'what time is it?'
 2025-12-25 11:00:00 CST - slack_agent - INFO - [2025-12-25 11:00:00 CST] RESPONSE - Sent time to channel C1234567890: The current time is 11:00:00 AM CST on 2025-12-25
 ```

@@ -18,13 +18,16 @@ class TestSlackAgent:
     def setup_method(self):
         """Set up test fixtures."""
         self.token = "xoxb-test-token"
-        self.agent = SlackAgent(self.token)
+        self.agent = SlackAgent(self.token, channels=["C123456"], poll_interval=1)
 
     def test_initialization(self):
         """Test SlackAgent initialization."""
         assert self.agent.token == self.token
-        assert self.agent.rtm_client is not None
         assert self.agent.web_client is not None
+        assert self.agent.channels == ["C123456"]
+        assert self.agent.poll_interval == 1
+        assert self.agent.last_timestamps == {}
+        assert self.agent.bot_user_id is None
 
     def test_is_time_query_positive_cases(self):
         """Test time query detection with positive cases."""
@@ -101,128 +104,206 @@ class TestSlackAgent:
         # Assertions - should not raise, but should log error
         mock_logger.error.assert_called_once()
 
-    @patch('slack_agent.logger')
-    def test_handle_hello(self, mock_logger):
-        """Test RTM hello event handling."""
-        payload = {"type": "hello"}
+    @patch('slack_agent.SlackApiError')
+    def test_get_channels_to_monitor_specified_channels(self, mock_slack_error):
+        """Test getting channels when channels are specified."""
+        self.agent.channels = ["C123", "C456"]
+        channels = self.agent._get_channels_to_monitor()
+        assert channels == ["C123", "C456"]
 
-        self.agent.handle_hello(payload)
+    @patch('slack_agent.SlackApiError')
+    def test_get_channels_to_monitor_auto_detect(self, mock_slack_error):
+        """Test getting channels with auto-detection."""
+        self.agent.channels = []
 
-        # Verify log message contains expected content
-        mock_logger.info.assert_called_once()
-        log_call = mock_logger.info.call_args[0][0]
-        assert "[2025-12-25" in log_call  # Contains date
-        assert "CST]" in log_call       # Contains timezone
-        assert "RTM connection established" in log_call
-
-    @patch('slack_agent.logger')
-    def test_handle_goodbye(self, mock_logger):
-        """Test RTM goodbye event handling."""
-        payload = {"type": "goodbye"}
-
-        self.agent.handle_goodbye(payload)
-
-        # Verify log message contains expected content
-        mock_logger.info.assert_called_once()
-        log_call = mock_logger.info.call_args[0][0]
-        assert "[2025-12-25" in log_call  # Contains date
-        assert "CST]" in log_call       # Contains timezone
-        assert "RTM connection closed" in log_call
-
-    @patch('slack_agent.logger')
-    def test_handle_message_with_time_query(self, mock_logger):
-        """Test message handling with time query."""
-        payload = {
-            "data": {
-                "text": "what time is it?",
-                "channel": "C1234567890",
-                "user": "U1234567890",
-                "ts": "1640995200.000100"
-            }
+        # Mock the API response
+        mock_response = {
+            "ok": True,
+            "channels": [
+                {"id": "C001", "name": "random"},
+                {"id": "C002", "name": "general"},
+                {"id": "C003", "name": "another-general"},
+                {"id": "C004", "name": "private"}
+            ]
         }
+        self.agent.web_client.conversations_list.return_value = mock_response
+
+        channels = self.agent._get_channels_to_monitor()
+        assert channels == ["C002", "C003"]  # Should prefer general channels
+
+    @patch('slack_agent.SlackApiError')
+    def test_get_channels_to_monitor_api_error(self, mock_slack_error):
+        """Test getting channels with API error."""
+        self.agent.channels = []
+
+        # Mock API error
+        mock_slack_error.return_value.response = {"error": "not_allowed"}
+        self.agent.web_client.conversations_list.side_effect = mock_slack_error
+
+        channels = self.agent._get_channels_to_monitor()
+        assert channels == []
+
+    def test_get_bot_user_id_success(self):
+        """Test getting bot user ID successfully."""
+        mock_response = {"ok": True, "user_id": "U123456"}
+        self.agent.web_client.auth_test.return_value = mock_response
+
+        user_id = self.agent._get_bot_user_id()
+        assert user_id == "U123456"
+
+    def test_get_bot_user_id_error(self):
+        """Test getting bot user ID with error."""
+        from slack_sdk.errors import SlackApiError
+        mock_error = SlackApiError("Auth failed", {"error": "invalid_auth"})
+        self.agent.web_client.auth_test.side_effect = mock_error
+
+        user_id = self.agent._get_bot_user_id()
+        assert user_id is None
+
+    @patch('slack_agent.logger')
+    def test_poll_messages_with_time_query(self, mock_logger):
+        """Test polling messages with time query."""
+        # Setup agent
+        self.agent.bot_user_id = "U999999"
+        self.agent.last_timestamps = {}
+
+        # Mock API responses
+        history_response = {
+            "ok": True,
+            "messages": [
+                {
+                    "ts": "1640995200.000200",
+                    "user": "U1234567890",
+                    "text": "what time is it?"
+                }
+            ]
+        }
+        self.agent.web_client.conversations_history.return_value = history_response
 
         with patch.object(self.agent, '_respond_with_time') as mock_respond:
-            self.agent.handle_message(payload)
+            self.agent._poll_messages()
 
             # Verify message was logged
-            assert mock_logger.info.call_count == 2  # One for message, one for potential response
+            mock_logger.info.assert_called()
+            log_calls = [call[0][0] for call in mock_logger.info.call_args_list]
+            assert any("MESSAGE" in call and "what time is it?" in call for call in log_calls)
 
             # Verify time response was triggered
-            mock_respond.assert_called_once_with("C1234567890")
+            mock_respond.assert_called_once_with("C123456")
 
     @patch('slack_agent.logger')
-    def test_handle_message_without_time_query(self, mock_logger):
-        """Test message handling without time query."""
-        payload = {
-            "data": {
-                "text": "hello world",
-                "channel": "C1234567890",
-                "user": "U1234567890",
-                "ts": "1640995200.000100"
-            }
+    def test_poll_messages_without_time_query(self, mock_logger):
+        """Test polling messages without time query."""
+        # Setup agent
+        self.agent.bot_user_id = "U999999"
+        self.agent.last_timestamps = {}
+
+        # Mock API responses
+        history_response = {
+            "ok": True,
+            "messages": [
+                {
+                    "ts": "1640995200.000200",
+                    "user": "U1234567890",
+                    "text": "hello world"
+                }
+            ]
         }
+        self.agent.web_client.conversations_history.return_value = history_response
 
         with patch.object(self.agent, '_respond_with_time') as mock_respond:
-            self.agent.handle_message(payload)
+            self.agent._poll_messages()
 
             # Verify message was logged
-            mock_logger.info.assert_called_once()
+            mock_logger.info.assert_called()
 
             # Verify no time response was triggered
             mock_respond.assert_not_called()
 
     @patch('slack_agent.logger')
-    def test_handle_message_error(self, mock_logger):
-        """Test message handling with error."""
-        payload = {"data": {}}  # Incomplete payload
+    def test_poll_messages_skip_bot_messages(self, mock_logger):
+        """Test polling messages skips bot's own messages."""
+        # Setup agent
+        self.agent.bot_user_id = "U1234567890"  # Bot's own user ID
+        self.agent.last_timestamps = {}
 
-        # Should not raise exception, but should log error
-        self.agent.handle_message(payload)
+        # Mock API responses
+        history_response = {
+            "ok": True,
+            "messages": [
+                {
+                    "ts": "1640995200.000200",
+                    "user": "U1234567890",  # Bot's own message
+                    "text": "what time is it?"
+                }
+            ]
+        }
+        self.agent.web_client.conversations_history.return_value = history_response
 
-        # Verify error was logged
-        mock_logger.error.assert_called_once()
+        with patch.object(self.agent, '_respond_with_time') as mock_respond:
+            self.agent._poll_messages()
+
+            # Verify no time response was triggered (bot ignores its own messages)
+            mock_respond.assert_not_called()
 
     @patch('slack_agent.logger')
-    def test_start_success(self, mock_logger):
+    @patch('slack_agent.time.sleep')
+    def test_start_success(self, mock_sleep, mock_logger):
         """Test successful agent start."""
-        # Mock RTM client
-        self.agent.rtm_client = Mock()
-        self.agent.rtm_client.start.return_value = None
+        # Mock authentication
+        self.agent.web_client.auth_test.return_value = {"ok": True, "user_id": "U123456"}
 
-        # Should complete without exception
-        self.agent.start()
+        # Mock polling to avoid infinite loop
+        with patch.object(self.agent, '_poll_messages') as mock_poll:
+            mock_poll.side_effect = KeyboardInterrupt()  # Stop after first poll
 
-        # Verify startup log
-        mock_logger.info.assert_called_once()
-        log_call = mock_logger.info.call_args[0][0]
-        assert "Starting Slack Agent" in log_call
+            # Should complete without exception
+            self.agent.start()
+
+            # Verify startup logs
+            assert mock_logger.info.call_count >= 2  # At least startup and bot user logs
 
     @patch('slack_agent.logger')
-    def test_start_keyboard_interrupt(self, mock_logger):
+    def test_start_auth_failure(self, mock_logger):
+        """Test agent start with authentication failure."""
+        # Mock authentication failure
+        self.agent.web_client.auth_test.return_value = {"ok": False}
+
+        # Should raise exception
+        with pytest.raises(Exception, match="Could not authenticate bot user"):
+            self.agent.start()
+
+    @patch('slack_agent.logger')
+    @patch('slack_agent.time.sleep')
+    def test_start_keyboard_interrupt(self, mock_sleep, mock_logger):
         """Test agent start with keyboard interrupt."""
-        # Mock RTM client to raise KeyboardInterrupt
-        self.agent.rtm_client = Mock()
-        self.agent.rtm_client.start.side_effect = KeyboardInterrupt()
+        # Mock authentication
+        self.agent.web_client.auth_test.return_value = {"ok": True, "user_id": "U123456"}
 
-        # Should complete without exception
-        self.agent.start()
+        # Mock polling to raise KeyboardInterrupt
+        with patch.object(self.agent, '_poll_messages') as mock_poll:
+            mock_poll.side_effect = KeyboardInterrupt()
 
-        # Verify shutdown log
-        mock_logger.info.assert_called_with("Slack Agent stopped by user")
+            # Should complete without exception
+            self.agent.start()
+
+            # Verify shutdown log
+            shutdown_logs = [call[0][0] for call in mock_logger.info.call_args_list]
+            assert any("stopped by user" in log for log in shutdown_logs)
 
     @patch('slack_agent.logger')
     def test_start_general_error(self, mock_logger):
         """Test agent start with general error."""
-        # Mock RTM client to raise exception
-        self.agent.rtm_client = Mock()
-        self.agent.rtm_client.start.side_effect = Exception("Connection failed")
+        # Mock authentication
+        self.agent.web_client.auth_test.return_value = {"ok": True, "user_id": "U123456"}
 
-        # Should raise exception
-        with pytest.raises(Exception):
-            self.agent.start()
+        # Mock polling to raise exception
+        with patch.object(self.agent, '_poll_messages') as mock_poll:
+            mock_poll.side_effect = Exception("Polling failed")
 
-        # Verify error log
-        mock_logger.error.assert_called_once()
+            # Should raise exception
+            with pytest.raises(Exception, match="Polling failed"):
+                self.agent.start()
 
 
 class TestCSTTimezone:
@@ -261,7 +342,7 @@ class TestMainFunction:
         main()
 
         # Verify agent was created and started
-        mock_agent_class.assert_called_once_with('xoxb-test-token')
+        mock_agent_class.assert_called_once_with('xoxb-test-token', channels=None, poll_interval=5)
         mock_agent.start.assert_called_once()
 
     @patch.dict('os.environ', {}, clear=True)

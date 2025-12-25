@@ -2,7 +2,7 @@
 """
 Slack Agent Script.
 
-This script connects to Slack using Real Time Messaging (RTM) and responds
+This script monitors Slack channels using the Web API and responds
 to messages. It specifically handles "what time is it?" queries by responding
 with the current time in Central Standard Time (CST).
 
@@ -17,20 +17,22 @@ Configuration:
 
 Environment Variables:
     SLACK_BOT_TOKEN: Your Slack bot token (required)
+    SLACK_AGENT_CHANNELS: Comma-separated list of channel IDs to monitor (optional, default: general channels)
+    SLACK_AGENT_POLL_INTERVAL: Polling interval in seconds (optional, default: 5)
 
-The script runs in foreground and processes messages in real-time.
+The script runs in foreground and polls for new messages periodically.
 """
 
 import logging
 import sys
 import time
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 import pytz
 from dotenv import load_dotenv
 from slack_sdk import WebClient
-from slack_sdk.rtm_v2 import RTMClient
+from slack_sdk.errors import SlackApiError
 
 # Configure logging to stdout
 logging.basicConfig(
@@ -48,63 +50,82 @@ CST = pytz.timezone('America/Chicago')
 
 class SlackAgent:
     """
-    Slack RTM agent that responds to time queries.
+    Slack Web API agent that responds to time queries.
 
-    Connects to Slack via RTM and listens for messages containing
+    Monitors Slack channels using Web API polling and responds to messages containing
     "what time is it?" (case insensitive).
     """
 
-    def __init__(self, token: str):
+    def __init__(self, token: str, channels: Optional[List[str]] = None, poll_interval: int = 5):
         """
         Initialize the Slack agent.
 
         Args:
             token: Slack bot token
+            channels: List of channel IDs to monitor (optional)
+            poll_interval: Polling interval in seconds (default: 5)
         """
         self.token = token
-        self.rtm_client = RTMClient(token=token)
         self.web_client = WebClient(token=token)
+        self.channels = channels or []
+        self.poll_interval = poll_interval
 
-        # Set up event handlers
-        self.rtm_client.on("message")(self.handle_message)
-        self.rtm_client.on("hello")(self.handle_hello)
-        self.rtm_client.on("goodbye")(self.handle_goodbye)
+        # Track last seen message timestamps for each channel to avoid duplicates
+        self.last_timestamps = {}
 
-    def handle_hello(self, payload):
-        """Handle RTM connection established."""
-        timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
-        logger.info(f"[{timestamp}] RTM connection established - Hello from Slack!")
+        # Bot user ID (will be set during start)
+        self.bot_user_id = None
 
-    def handle_goodbye(self, payload):
-        """Handle RTM disconnection."""
-        timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
-        logger.info(f"[{timestamp}] RTM connection closed - Goodbye from Slack!")
-
-    def handle_message(self, payload):
+    def _get_channels_to_monitor(self) -> List[str]:
         """
-        Handle incoming messages.
+        Get the list of channels to monitor.
 
-        Responds to "what time is it?" queries with current CST time.
+        If no channels specified, try to find general-like channels.
+
+        Returns:
+            List of channel IDs
+        """
+        if self.channels:
+            return self.channels
+
+        try:
+            # Get list of channels the bot can access
+            response = self.web_client.conversations_list(types="public_channel,private_channel")
+
+            if response["ok"]:
+                channels = response["channels"]
+                # Prefer channels with "general" in the name, or just take the first few
+                general_channels = [ch for ch in channels if "general" in ch["name"].lower()]
+                if general_channels:
+                    return [ch["id"] for ch in general_channels[:3]]  # Limit to 3 channels
+
+                # Fallback: take first 3 channels
+                return [ch["id"] for ch in channels[:3]]
+            else:
+                logger.warning("Could not retrieve channel list, will monitor no channels")
+                return []
+
+        except SlackApiError as e:
+            logger.error(f"Error getting channels: {e.response.get('error', 'unknown')}")
+            return []
+
+    def _get_bot_user_id(self) -> Optional[str]:
+        """
+        Get the bot's user ID.
+
+        Returns:
+            Bot user ID or None if error
         """
         try:
-            # Extract message details
-            data = payload.get("data", {})
-            message_text = data.get("text", "").strip().lower()
-            channel = data.get("channel", "")
-            user = data.get("user", "")
-            timestamp = data.get("ts", "")
-
-            # Log the incoming message
-            log_timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
-            logger.info(f"[{log_timestamp}] MESSAGE - Channel: {channel}, User: {user}, Text: '{data.get('text', '')}'")
-
-            # Check if this is a time query
-            if self._is_time_query(message_text):
-                self._respond_with_time(channel)
-
-        except Exception as e:
-            log_timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
-            logger.error(f"[{log_timestamp}] Error handling message: {e}")
+            response = self.web_client.auth_test()
+            if response["ok"]:
+                return response["user_id"]
+            else:
+                logger.error("Could not authenticate bot")
+                return None
+        except SlackApiError as e:
+            logger.error(f"Error authenticating bot: {e.response.get('error', 'unknown')}")
+            return None
 
     def _is_time_query(self, message_text: str) -> bool:
         """
@@ -116,18 +137,22 @@ class SlackAgent:
         Returns:
             True if this appears to be a time query
         """
+        # Convert to lowercase for case-insensitive matching
+        message_text = message_text.lower().strip()
+
+        # Exact matches for time queries
         time_queries = [
             "what time is it",
-            "what's the time",
-            "what is the time",
             "what time is it?",
+            "what's the time",
             "what's the time?",
+            "what is the time",
             "what is the time?",
             "time",
             "current time"
         ]
 
-        return any(query in message_text for query in time_queries)
+        return message_text in time_queries
 
     def _respond_with_time(self, channel: str):
         """
@@ -158,13 +183,81 @@ class SlackAgent:
             log_timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
             logger.error(f"[{log_timestamp}] Error sending time response to {channel}: {e}")
 
+    def _poll_messages(self):
+        """
+        Poll channels for new messages and process them.
+        """
+        channels_to_monitor = self._get_channels_to_monitor()
+
+        if not channels_to_monitor:
+            logger.warning("No channels to monitor")
+            return
+
+        logger.info(f"Monitoring channels: {', '.join(channels_to_monitor)}")
+
+        for channel_id in channels_to_monitor:
+            try:
+                # Get recent messages from this channel
+                response = self.web_client.conversations_history(
+                    channel=channel_id,
+                    limit=10,  # Get last 10 messages
+                    oldest=self.last_timestamps.get(channel_id, None)
+                )
+
+                if response["ok"]:
+                    messages = response.get("messages", [])
+
+                    # Process messages in chronological order (oldest first)
+                    for message in reversed(messages):
+                        message_ts = message.get("ts")
+                        user_id = message.get("user")
+                        text = message.get("text", "").strip()
+
+                        # Skip messages from the bot itself
+                        if user_id == self.bot_user_id:
+                            continue
+
+                        # Skip if we've already processed this message
+                        if self.last_timestamps.get(channel_id) and message_ts <= self.last_timestamps[channel_id]:
+                            continue
+
+                        # Log the incoming message
+                        log_timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
+                        logger.info(f"[{log_timestamp}] MESSAGE - Channel: {channel_id}, User: {user_id}, Text: '{message.get('text', '')}'")
+
+                        # Check if this is a time query
+                        if self._is_time_query(text):
+                            self._respond_with_time(channel_id)
+
+                        # Update last seen timestamp
+                        self.last_timestamps[channel_id] = message_ts
+
+                else:
+                    logger.warning(f"Failed to get history for channel {channel_id}: {response.get('error', 'unknown')}")
+
+            except SlackApiError as e:
+                error_type = e.response.get("error", "unknown") if e.response else "unknown"
+                logger.error(f"Error polling channel {channel_id}: {error_type}")
+            except Exception as e:
+                logger.error(f"Unexpected error polling channel {channel_id}: {e}")
+
     def start(self):
-        """Start the RTM connection and begin listening for messages."""
+        """Start the polling loop and begin monitoring messages."""
         log_timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
         logger.info(f"[{log_timestamp}] Starting Slack Agent...")
 
+        # Get bot user ID
+        self.bot_user_id = self._get_bot_user_id()
+        if not self.bot_user_id:
+            raise Exception("Could not authenticate bot user")
+
+        logger.info(f"Bot authenticated as user: {self.bot_user_id}")
+
         try:
-            self.rtm_client.start()
+            while True:
+                self._poll_messages()
+                time.sleep(self.poll_interval)
+
         except KeyboardInterrupt:
             log_timestamp = datetime.now(CST).strftime('%Y-%m-%d %H:%M:%S %Z')
             logger.info(f"[{log_timestamp}] Slack Agent stopped by user")
@@ -187,8 +280,21 @@ def main():
         print("Error: SLACK_BOT_TOKEN environment variable is required")
         sys.exit(1)
 
+    # Get channels to monitor from environment
+    channels_str = os.getenv("SLACK_AGENT_CHANNELS", "")
+    channels = [ch.strip() for ch in channels_str.split(",") if ch.strip()] if channels_str else None
+
+    # Get polling interval from environment
+    poll_interval_str = os.getenv("SLACK_AGENT_POLL_INTERVAL", "5")
+    try:
+        poll_interval = int(poll_interval_str)
+        if poll_interval < 1:
+            poll_interval = 5
+    except ValueError:
+        poll_interval = 5
+
     # Create and start the agent
-    agent = SlackAgent(token)
+    agent = SlackAgent(token, channels=channels, poll_interval=poll_interval)
     agent.start()
 
 

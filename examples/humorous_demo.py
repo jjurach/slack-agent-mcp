@@ -6,6 +6,10 @@ This script sends funny test messages to a configured Slack channel
 to demonstrate the notification functionality in an entertaining way.
 Perfect for testing your Slack integration with a smile!
 
+Configuration:
+    The script loads configuration from environment variables. You can set these
+    directly or create a .env file in the project root (see .env.example).
+
 Environment Variables Required:
 - SLACK_BOT_TOKEN (required): Your Slack bot token (starts with xoxb-)
 - SLACK_DEFAULT_CHANNEL (optional): Target channel, defaults to "#general"
@@ -16,6 +20,7 @@ Environment Variables Required:
 import os
 import time
 import random
+from dotenv import load_dotenv
 from slack_notifications import notify_milestone, SlackNotificationError
 
 # Collection of humorous test messages
@@ -136,6 +141,9 @@ def main():
     print("🎭 Welcome to the Slack Notifications Humorous Demo!")
     print("This script will send funny test messages to your Slack channel.")
     print()
+
+    # Load environment variables from .env file if it exists
+    load_dotenv()
 
     # Validate configuration
     if not validate_environment():

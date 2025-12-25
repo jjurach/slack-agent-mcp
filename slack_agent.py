@@ -11,6 +11,10 @@ All interactions are logged to stdout with timestamps.
 Usage:
     python slack_agent.py
 
+Configuration:
+    The script loads configuration from environment variables. You can set these
+    directly or create a .env file in the project root (see .env.example).
+
 Environment Variables:
     SLACK_BOT_TOKEN: Your Slack bot token (required)
 
@@ -24,6 +28,7 @@ from datetime import datetime
 from typing import Optional
 
 import pytz
+from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_sdk.rtm_v2 import RTMClient
 
@@ -172,6 +177,9 @@ class SlackAgent:
 def main():
     """Main entry point for the Slack agent script."""
     import os
+
+    # Load environment variables from .env file if it exists
+    load_dotenv()
 
     # Get bot token from environment
     token = os.getenv("SLACK_BOT_TOKEN")

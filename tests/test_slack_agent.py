@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime
 import pytz
 
-from slack_agent import SlackAgent, CST
+from src.slack_agent import SlackAgent, CST
 
 
 class TestSlackAgent:
@@ -19,6 +19,8 @@ class TestSlackAgent:
         """Set up test fixtures."""
         self.token = "xoxb-test-token"
         self.agent = SlackAgent(self.token, channels=["C123456"], poll_interval=1)
+        # Replace web_client with mock for testing
+        self.agent.web_client = Mock()
 
     def test_initialization(self):
         """Test SlackAgent initialization."""
@@ -64,7 +66,7 @@ class TestSlackAgent:
         for query in non_time_queries:
             assert not self.agent._is_time_query(query), f"Incorrectly detected: {query}"
 
-    @patch('slack_agent.datetime')
+    @patch('src.slack_agent.__main__.datetime')
     def test_respond_with_time(self, mock_datetime):
         """Test time response functionality."""
         # Setup mock datetime
@@ -85,8 +87,8 @@ class TestSlackAgent:
             text="The current time is 11:00:00 AM CST on 2025-12-25"
         )
 
-    @patch('slack_agent.datetime')
-    @patch('slack_agent.logger')
+    @patch('src.slack_agent.__main__.datetime')
+    @patch('src.slack_agent.__main__.logger')
     def test_respond_with_time_error(self, mock_logger, mock_datetime):
         """Test time response with error handling."""
         # Setup mock datetime
@@ -104,14 +106,14 @@ class TestSlackAgent:
         # Assertions - should not raise, but should log error
         mock_logger.error.assert_called_once()
 
-    @patch('slack_agent.SlackApiError')
+    @patch('slack_sdk.errors.SlackApiError')
     def test_get_channels_to_monitor_specified_channels(self, mock_slack_error):
         """Test getting channels when channels are specified."""
         self.agent.channels = ["C123", "C456"]
         channels = self.agent._get_channels_to_monitor()
         assert channels == ["C123", "C456"]
 
-    @patch('slack_agent.SlackApiError')
+    @patch('slack_sdk.errors.SlackApiError')
     def test_get_channels_to_monitor_auto_detect(self, mock_slack_error):
         """Test getting channels with auto-detection."""
         self.agent.channels = []
@@ -131,7 +133,7 @@ class TestSlackAgent:
         channels = self.agent._get_channels_to_monitor()
         assert channels == ["C002", "C003"]  # Should prefer general channels
 
-    @patch('slack_agent.SlackApiError')
+    @patch('slack_sdk.errors.SlackApiError')
     def test_get_channels_to_monitor_api_error(self, mock_slack_error):
         """Test getting channels with API error."""
         self.agent.channels = []
@@ -160,7 +162,7 @@ class TestSlackAgent:
         user_id = self.agent._get_bot_user_id()
         assert user_id is None
 
-    @patch('slack_agent.logger')
+    @patch('src.slack_agent.__main__.logger')
     def test_poll_messages_with_time_query(self, mock_logger):
         """Test polling messages with time query."""
         # Setup agent
@@ -191,7 +193,7 @@ class TestSlackAgent:
             # Verify time response was triggered
             mock_respond.assert_called_once_with("C123456")
 
-    @patch('slack_agent.logger')
+    @patch('src.slack_agent.__main__.logger')
     def test_poll_messages_without_time_query(self, mock_logger):
         """Test polling messages without time query."""
         # Setup agent
@@ -220,7 +222,7 @@ class TestSlackAgent:
             # Verify no time response was triggered
             mock_respond.assert_not_called()
 
-    @patch('slack_agent.logger')
+    @patch('src.slack_agent.__main__.logger')
     def test_poll_messages_skip_bot_messages(self, mock_logger):
         """Test polling messages skips bot's own messages."""
         # Setup agent
@@ -246,8 +248,8 @@ class TestSlackAgent:
             # Verify no time response was triggered (bot ignores its own messages)
             mock_respond.assert_not_called()
 
-    @patch('slack_agent.logger')
-    @patch('slack_agent.time.sleep')
+    @patch('src.slack_agent.__main__.logger')
+    @patch('src.slack_agent.__main__.time.sleep')
     def test_start_success(self, mock_sleep, mock_logger):
         """Test successful agent start."""
         # Mock authentication
@@ -263,7 +265,7 @@ class TestSlackAgent:
             # Verify startup logs
             assert mock_logger.info.call_count >= 2  # At least startup and bot user logs
 
-    @patch('slack_agent.logger')
+    @patch('src.slack_agent.__main__.logger')
     def test_start_auth_failure(self, mock_logger):
         """Test agent start with authentication failure."""
         # Mock authentication failure
@@ -273,8 +275,8 @@ class TestSlackAgent:
         with pytest.raises(Exception, match="Could not authenticate bot user"):
             self.agent.start()
 
-    @patch('slack_agent.logger')
-    @patch('slack_agent.time.sleep')
+    @patch('src.slack_agent.__main__.logger')
+    @patch('src.slack_agent.__main__.time.sleep')
     def test_start_keyboard_interrupt(self, mock_sleep, mock_logger):
         """Test agent start with keyboard interrupt."""
         # Mock authentication
@@ -291,7 +293,7 @@ class TestSlackAgent:
             shutdown_logs = [call[0][0] for call in mock_logger.info.call_args_list]
             assert any("stopped by user" in log for log in shutdown_logs)
 
-    @patch('slack_agent.logger')
+    @patch('src.slack_agent.__main__.logger')
     def test_start_general_error(self, mock_logger):
         """Test agent start with general error."""
         # Mock authentication
@@ -330,14 +332,14 @@ class TestCSTTimezone:
 class TestMainFunction:
     """Test the main function."""
 
-    @patch('slack_agent.SlackAgent')
+    @patch('src.slack_agent.__main__.SlackAgent')
     @patch.dict('os.environ', {'SLACK_BOT_TOKEN': 'xoxb-test-token'})
     def test_main_success(self, mock_agent_class):
         """Test successful main execution."""
         mock_agent = Mock()
         mock_agent_class.return_value = mock_agent
 
-        from slack_agent import main
+        from src.slack_agent import main
 
         main()
 
@@ -348,7 +350,7 @@ class TestMainFunction:
     @patch.dict('os.environ', {}, clear=True)
     def test_main_missing_token(self):
         """Test main with missing bot token."""
-        from slack_agent import main
+        from src.slack_agent import main
         import sys
         from unittest.mock import patch
 

@@ -29,6 +29,13 @@ pip install slack-notifications
 
 2. **Configure environment variables:**
    ```bash
+   # Copy the example file and fill in your values
+   cp .env.example .env
+   # Edit .env with your actual Slack bot token
+   ```
+
+   Or set environment variables directly:
+   ```bash
    export SLACK_BOT_TOKEN="xoxb-your-bot-token-here"
    export SLACK_DEFAULT_CHANNEL="#general"
    ```
@@ -49,16 +56,46 @@ pip install slack-notifications
 
 ## Configuration
 
+The application supports multiple configuration methods, automatically loading in this priority order:
+1. Environment variables (highest priority)
+2. `.env` file in the current directory
+3. `slack_notifications.toml` file
+4. Built-in defaults (lowest priority)
+
+### Using .env Files (Recommended)
+
+For secure, static deployment configuration:
+
+1. **Copy the example file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit `.env` with your actual values:**
+   ```bash
+   # Required
+   SLACK_BOT_TOKEN=xoxb-your-actual-bot-token
+
+   # Optional (with defaults shown)
+   SLACK_DEFAULT_CHANNEL=#general
+   SLACK_TIMEOUT=30
+   SLACK_MAX_RETRIES=3
+   ```
+
+**Security Note:** The `.env` file is automatically ignored by Git and should never be committed to version control.
+
 ### Environment Variables
+
+You can also set configuration via environment variables:
 
 - `SLACK_BOT_TOKEN`: Your Slack bot token (required)
 - `SLACK_DEFAULT_CHANNEL`: Default channel for notifications (default: "#general")
 - `SLACK_TIMEOUT`: Request timeout in seconds (default: 30)
 - `SLACK_MAX_RETRIES`: Maximum retry attempts (default: 3)
 
-### Configuration File
+### TOML Configuration File
 
-You can also use a `.env` file or `slack_notifications.toml` for configuration:
+Alternatively, use a `slack_notifications.toml` file:
 
 ```toml
 # slack_notifications.toml

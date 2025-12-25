@@ -160,6 +160,11 @@ def configure_slack_notifications(
         raise ValueError(error_msg) from e
 
 
-if __name__ == "__main__":
+def main():
+    """Run the Slack MCP server."""
     logger.info("Starting Slack MCP server...")
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()

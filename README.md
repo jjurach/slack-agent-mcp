@@ -1,0 +1,226 @@
+# Slack Notifications
+
+A simple Python library for sending Slack notifications at application milestones.
+
+## Features
+
+- 🚀 Simple API for milestone notifications
+- ⚙️ Flexible configuration via environment variables or config files
+- 🔄 Async support for non-blocking notifications
+- 🛡️ Comprehensive error handling and logging
+- 📝 Full type hints and documentation
+- 🧪 Well-tested with examples
+- 🤖 **NEW:** MCP Server for AI agent integration
+- ⏰ **NEW:** Real-time Slack Agent with time queries
+
+## Installation
+
+```bash
+pip install slack-notifications
+```
+
+## Quick Start
+
+1. **Set up your Slack app and get a bot token:**
+   - Go to [Slack API](https://api.slack.com/apps)
+   - Create a new app or use an existing one
+   - Add the bot to your workspace
+   - Copy the Bot User OAuth Token
+
+2. **Configure environment variables:**
+   ```bash
+   export SLACK_BOT_TOKEN="xoxb-your-bot-token-here"
+   export SLACK_DEFAULT_CHANNEL="#general"
+   ```
+
+3. **Use in your Python code:**
+   ```python
+   from slack_notifications import notify_milestone
+
+   # Send a simple milestone notification
+   notify_milestone("Application started successfully!")
+
+   # Send to a specific channel with custom level
+   notify_milestone("Database migration completed", channel="#dev-ops", level="info")
+
+   # Send error notifications
+   notify_milestone("Critical error occurred", level="error")
+   ```
+
+## Configuration
+
+### Environment Variables
+
+- `SLACK_BOT_TOKEN`: Your Slack bot token (required)
+- `SLACK_DEFAULT_CHANNEL`: Default channel for notifications (default: "#general")
+- `SLACK_TIMEOUT`: Request timeout in seconds (default: 30)
+- `SLACK_MAX_RETRIES`: Maximum retry attempts (default: 3)
+
+### Configuration File
+
+You can also use a `.env` file or `slack_notifications.toml` for configuration:
+
+```toml
+# slack_notifications.toml
+[slack]
+bot_token = "xoxb-your-bot-token-here"
+default_channel = "#notifications"
+timeout = 30
+max_retries = 3
+```
+
+## Async Usage
+
+For non-blocking notifications in async applications:
+
+```python
+import asyncio
+from slack_notifications import notify_milestone_async
+
+async def main():
+    # Send notification asynchronously
+    await notify_milestone_async("Async operation completed")
+
+    # Continue with other work immediately
+    await do_other_work()
+
+asyncio.run(main())
+```
+
+## Error Handling
+
+The library includes comprehensive error handling:
+
+```python
+from slack_notifications import notify_milestone, SlackNotificationError
+
+try:
+    notify_milestone("Test notification")
+    print("Notification sent successfully!")
+except SlackNotificationError as e:
+    print(f"Failed to send notification: {e}")
+```
+
+## Advanced Usage
+
+### Custom Configuration
+
+```python
+from slack_notifications import SlackNotifier
+
+# Create notifier with custom config
+notifier = SlackNotifier(
+    bot_token="xoxb-custom-token",
+    default_channel="#custom-channel",
+    timeout=60
+)
+
+notifier.notify("Custom notification")
+```
+
+### Logging Integration
+
+The library integrates with Python's logging module:
+
+```python
+import logging
+from slack_notifications import SlackHandler
+
+# Add Slack handler to your logger
+logger = logging.getLogger()
+slack_handler = SlackHandler(channel="#logs", level=logging.ERROR)
+logger.addHandler(slack_handler)
+
+# Now errors will be sent to Slack automatically
+logger.error("This error will appear in Slack!")
+```
+
+## MCP Server for AI Agents
+
+The slack-agent project now includes a FastMCP server that allows AI agents to send notifications to Slack channels via the Model Context Protocol (MCP).
+
+### Starting the MCP Server
+
+```bash
+python slack_mcp_server.py
+```
+
+### Available MCP Tools
+
+- `send_slack_message(message, channel, level)` - Send a notification message
+- `send_slack_success(message, channel)` - Send a success notification
+- `send_slack_warning(message, channel)` - Send a warning notification
+- `send_slack_error(message, channel)` - Send an error notification
+- `configure_slack_notifications(...)` - Configure Slack settings
+
+### AI Agent Integration
+
+AI agents can use these tools to send Slack messages. For example:
+
+```
+AI Agent: I need to notify the team about the deployment.
+
+MCP Tool Call: send_slack_success("🚀 Production deployment completed successfully!", "#devops")
+```
+
+See [doc/mcp-service-setup.md](doc/mcp-service-setup.md) for detailed setup and usage instructions.
+
+## Real-Time Slack Agent
+
+The project includes a real-time Slack bot that connects via RTM and responds to time queries with current CST time.
+
+### Running the Slack Agent
+
+```bash
+export SLACK_BOT_TOKEN="xoxb-your-bot-token-here"
+python slack_agent.py
+```
+
+### Time Query Responses
+
+The agent responds to messages containing time-related queries:
+
+- "what time is it" → "The current time is 11:00:00 AM CST on 2025-12-25"
+- "what's the time?" → Same response
+- "time" → Same response
+
+### Logging
+
+All interactions are logged to stdout with CST timestamps:
+
+```
+2025-12-25 11:00:00 CST - slack_agent - INFO - [2025-12-25 11:00:00 CST] MESSAGE - Channel: C1234567890, User: U1234567890, Text: 'what time is it?'
+2025-12-25 11:00:00 CST - slack_agent - INFO - [2025-12-25 11:00:00 CST] RESPONSE - Sent time to channel C1234567890: The current time is 11:00:00 AM CST on 2025-12-25
+```
+
+See [doc/slack-agent-usage.md](doc/slack-agent-usage.md) for complete setup and usage instructions.
+
+## Development
+
+### Setup
+
+```bash
+git clone https://github.com/yourusername/slack-notifications.git
+cd slack-notifications
+pip install -e ".[dev,test]"
+```
+
+### Testing
+
+```bash
+pytest
+```
+
+### Building
+
+```bash
+python -m build
+```
+
+## License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

@@ -177,17 +177,14 @@ class TestMCPIntegration:
             mock_asyncio_run.assert_called_once()
             mock_logger.info.assert_called_once_with("Starting Slack MCP server...")
 
-    @patch('slack_notifications.mcp_server.mcp')
-    def test_mcp_server_initialization(self, mock_mcp):
-        """Test that MCP server is properly initialized."""
-        # Import the module to trigger initialization
+    def test_mcp_server_import(self):
+        """Test that MCP server module can be imported without errors."""
+        # This test ensures the FastMCP instantiation works correctly
         import slack_notifications.mcp_server
 
-        # Verify FastMCP was called with correct parameters
-        mock_mcp.assert_called_once_with(
-            "slack-notifications",
-            description="Send notifications to Slack channels via MCP protocol"
-        )
+        # Verify the mcp object exists and has the expected name
+        assert hasattr(slack_notifications.mcp_server, 'mcp')
+        assert slack_notifications.mcp_server.mcp.name == "slack-notifications"
 
 
 if __name__ == "__main__":

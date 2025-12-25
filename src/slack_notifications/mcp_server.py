@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Create FastMCP server instance
 mcp = FastMCP(
     "slack-notifications",
-    description="Send notifications to Slack channels via MCP protocol"
+    instructions="Send notifications to Slack channels via MCP protocol"
 )
 
 
@@ -160,16 +160,6 @@ def configure_slack_notifications(
         raise ValueError(error_msg) from e
 
 
-def main():
-    """Run the MCP server."""
-    import asyncio
-
-    async def run_server():
-        logger.info("Starting Slack MCP server...")
-        await mcp.run()
-
-    asyncio.run(run_server())
-
-
 if __name__ == "__main__":
-    main()
+    logger.info("Starting Slack MCP server...")
+    mcp.run()

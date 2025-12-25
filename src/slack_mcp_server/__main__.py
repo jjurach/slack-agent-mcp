@@ -24,17 +24,17 @@ from pathlib import Path
 # Add the current directory to Python path so we can import slack_notifications
 sys.path.insert(0, str(Path(__file__).parent))
 
-from slack_notifications.mcp_server import main
+from slack_notifications.mcp_server import mcp
 
 if __name__ == "__main__":
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format='%(asctime)s - %(levelname)s - %(message)s'
     )
 
     try:
-        main()
+        mcp.run()
     except KeyboardInterrupt:
         print("\nSlack MCP server stopped by user")
         sys.exit(0)

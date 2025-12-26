@@ -1,0 +1,172 @@
+# Example Model-Backend Configuration
+# This file demonstrates the new model-backend mapping concept
+
+# Model definitions - What clients see and interact with
+models:
+  # Simple mapping (provider/backend_model)
+  gpt-4: "openai/gpt-4"
+
+  # Full configuration with metadata
+  creative-writer:
+    backend: "anthropic/claude-3-sonnet-20240229"
+    description: "Creative writing assistant with high creativity"
+    capabilities: ["chat", "completion"]
+    parameters:
+      temperature: 0.9
+      max_tokens: 8192
+    aliases: ["writer", "author", "creative"]
+
+  code-assistant:
+    backend: "anthropic/claude-3-haiku-20240307"
+    description: "Fast and accurate coding assistant"
+    capabilities: ["chat", "completion", "code"]
+    parameters:
+      temperature: 0.2
+      max_tokens: 4096
+    aliases: ["coder", "programmer"]
+
+  fast-chat:
+    backend: "ollama/llama3.2:3b"
+    description: "Fast local responses for casual conversation"
+    capabilities: ["chat"]
+    parameters:
+      temperature: 0.7
+      max_tokens: 2048
+    aliases: ["quick", "local"]
+
+  budget-chat:
+    backend: "openai/gpt-3.5-turbo"
+    description: "Cost-effective general purpose chat"
+    capabilities: ["chat", "completion"]
+    parameters:
+      temperature: 0.7
+      max_tokens: 4096
+    aliases: ["cheap", "budget"]
+
+  premium-analysis:
+    backend: "anthropic/claude-3-opus-20240229"
+    description: "High-quality analysis and reasoning"
+    capabilities: ["chat", "completion", "analysis", "reasoning"]
+    parameters:
+      temperature: 0.1
+      max_tokens: 16384
+    aliases: ["analyst", "reasoner", "premium"]
+
+# Backend provider configurations
+backends:
+  openai:
+    provider: "openai"
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "https://api.openai.com/v1"
+    timeout: 30
+    retry_attempts: 3
+    models:
+      gpt-4:
+        context_window: 8192
+        pricing:
+          input: 0.03
+          output: 0.06
+      gpt-3.5-turbo:
+        context_window: 16384
+        pricing:
+          input: 0.0015
+          output: 0.002
+    rate_limits:
+      requests_per_minute: 10000
+      tokens_per_minute: 2000000
+
+  anthropic:
+    provider: "anthropic"
+    api_key: "${ANTHROPIC_API_KEY}"
+    base_url: "https://api.anthropic.com"
+    timeout: 60
+    retry_attempts: 2
+    models:
+      claude-3-opus-20240229:
+        context_window: 200000
+        pricing:
+          input: 0.015
+          output: 0.075
+      claude-3-sonnet-20240229:
+        context_window: 200000
+        pricing:
+          input: 0.003
+          output: 0.015
+      claude-3-haiku-20240307:
+        context_window: 200000
+        pricing:
+          input: 0.00025
+          output: 0.00125
+    rate_limits:
+      requests_per_minute: 50
+      tokens_per_minute: 25000
+
+  ollama:
+    provider: "ollama"
+    base_url: "http://localhost:11434"
+    timeout: 120
+    retry_attempts: 1
+    models:
+      llama3.2:3b:
+        context_window: 4096
+        pricing:
+          input: 0
+          output: 0
+    rate_limits:
+      requests_per_minute: 1000
+      tokens_per_minute: 100000
+
+# Global model defaults
+model_defaults:
+  temperature: 0.7
+  max_tokens: 4096
+  timeout: 30
+
+# Fallback configuration for reliability
+fallback_providers:
+  - provider: "anthropic"
+    priority: 1
+    conditions: ["api_error", "rate_limit"]
+  - provider: "openai"
+    priority: 2
+    conditions: ["api_error", "rate_limit"]
+  - provider: "ollama"
+    priority: 3
+    conditions: ["api_error"]
+
+# Cost optimization settings
+cost_optimization:
+  enabled: true
+  strategy: "lowest_cost"  # Options: lowest_cost, lowest_latency, balanced
+  max_cost_per_request: 0.1  # Maximum cost in USD per request
+
+# Monitoring and analytics
+monitoring:
+  enabled: true
+  metrics:
+    - request_count
+    - token_usage
+    - response_time
+    - error_rate
+    - cost_tracking
+  log_level: "INFO"
+  export_to: "console"  # Options: console, file, prometheus
+
+# Security settings
+security:
+  allowed_providers: ["openai", "anthropic", "ollama"]
+  max_tokens_per_request: 32768
+  content_filtering:
+    enabled: true
+    provider: "openai"  # Use OpenAI for content moderation
+  audit_logging: true
+
+# Development settings
+development:
+  mock_responses: false
+  debug_mode: false
+  test_backends:
+    - provider: "mock"
+      models:
+        mock-gpt: {}
+        mock-claude: {}

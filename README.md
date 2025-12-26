@@ -202,6 +202,51 @@ MCP Tool Call: send_slack_success("🚀 Production deployment completed successf
 
 See [doc/mcp-service-setup.md](doc/mcp-service-setup.md) for detailed setup and usage instructions.
 
+## Model Configuration (Conceptual Change)
+
+The slack-agent project supports a conceptual change in how AI models are configured and managed. This change introduces a clear separation between **models** (what users interact with) and **backends** (provider implementations).
+
+### Model vs Backend Concept
+
+- **Model**: User-facing interface with friendly names, descriptions, and capabilities
+- **Backend**: Actual provider implementation (OpenAI, Anthropic, Ollama, etc.)
+
+This enables flexible routing, failover, cost optimization, and multi-provider support.
+
+### Configuration Structure
+
+```yaml
+# models: What users see and select
+models:
+  creative-writer:
+    backend: "anthropic/claude-3-sonnet"
+    description: "Creative writing assistant"
+    capabilities: ["chat", "completion"]
+
+  fast-chat:
+    backend: "ollama/llama3.2:3b"
+    description: "Fast local responses"
+
+# backends: Provider configurations
+backends:
+  anthropic:
+    provider: "anthropic"
+    api_key: "${ANTHROPIC_API_KEY}"
+
+  ollama:
+    provider: "ollama"
+    base_url: "http://localhost:11434"
+```
+
+### Benefits
+
+- **Provider Agnosticism**: Switch providers without changing user-facing model names
+- **Failover**: Automatic fallback to alternative providers
+- **Cost Optimization**: Route to cheapest available provider
+- **Load Balancing**: Distribute requests across multiple backends
+
+See [doc/model-backend-concept.md](doc/model-backend-concept.md) for complete conceptual documentation and [examples/model_config_example.yaml](examples/model_config_example.yaml) for configuration examples.
+
 ## Slack Agent
 
 The project includes a Slack bot that monitors channels using the Web API and responds to time queries with current CST time.

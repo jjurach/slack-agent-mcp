@@ -6,14 +6,18 @@ to send notifications to Slack channels.
 """
 
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from fastmcp import FastMCP
 
 from .config import SlackConfig
 from .exceptions import SlackConfigError, SlackNotificationError
+from .logging import configure_logging, get_audit_logger
 from .notifier import SlackNotifier
+from .utils import clear_request_id, get_request_id, mask_credentials, set_request_id
 
+# Configure logging
+configure_logging()
 logger = logging.getLogger(__name__)
 
 # Create FastMCP server instance
@@ -28,7 +32,7 @@ def send_slack_message(
     message: str,
     channel: Optional[str] = None,
     level: str = "info"
-) -> str:
+) -> Dict[str, Any]:
     """
     Send a notification message to a Slack channel.
 
@@ -38,12 +42,12 @@ def send_slack_message(
         level: Message level - "info", "success", "warning", or "error"
 
     Returns:
-        Success message with timestamp and channel info
-
-    Raises:
-        SlackConfigError: If Slack is not configured
-        SlackNotificationError: If message sending fails
+        Structured response with status, data, and request_id
     """
+    request_id = set_request_id()
+    audit_logger = get_audit_logger()
+    start_time = audit_logger.start_timer()
+
     try:
         # Create notifier (will auto-load config)
         notifier = SlackNotifier()
@@ -52,27 +56,78 @@ def send_slack_message(
         response = notifier.notify(message=message, channel=channel, level=level)
 
         target_channel = channel or notifier.config.default_channel
-        return f"✅ Message sent successfully to {target_channel}"
+        duration_ms = audit_logger.stop_timer(start_time)
 
-    except SlackConfigError as e:
-        error_msg = f"❌ Slack configuration error: {e}"
-        logger.error(error_msg)
-        raise ValueError(error_msg) from e
-    except SlackNotificationError as e:
-        error_msg = f"❌ Failed to send Slack message: {e}"
-        logger.error(error_msg)
-        raise ValueError(error_msg) from e
+        # Log success
+        audit_logger.log_tool_call(
+            tool_name="send_slack_message",
+            parameters={"message": message, "channel": channel, "level": level},
+            request_id=request_id,
+            success=True,
+            duration_ms=duration_ms,
+        )
+
+        return {
+            "status": "success",
+            "data": {
+                "message": f"Message sent successfully to {target_channel}",
+                "channel": target_channel,
+                "timestamp": response.get("ts"),
+            },
+            "request_id": request_id,
+        }
+
+    except (SlackConfigError, SlackNotificationError) as e:
+        error_msg = mask_credentials(str(e))
+        duration_ms = audit_logger.stop_timer(start_time)
+
+        # Log failure
+        audit_logger.log_tool_call(
+            tool_name="send_slack_message",
+            parameters={"message": message, "channel": channel, "level": level},
+            request_id=request_id,
+            success=False,
+            error_message=error_msg,
+            duration_ms=duration_ms,
+        )
+
+        logger.error(f"Failed to send Slack message: {error_msg}")
+        return {
+            "status": "error",
+            "message": error_msg,
+            "request_id": request_id,
+        }
+
     except Exception as e:
-        error_msg = f"❌ Unexpected error sending Slack message: {e}"
-        logger.error(error_msg)
-        raise ValueError(error_msg) from e
+        error_msg = mask_credentials(str(e))
+        duration_ms = audit_logger.stop_timer(start_time)
+
+        # Log failure
+        audit_logger.log_tool_call(
+            tool_name="send_slack_message",
+            parameters={"message": message, "channel": channel, "level": level},
+            request_id=request_id,
+            success=False,
+            error_message=error_msg,
+            duration_ms=duration_ms,
+        )
+
+        logger.error(f"Unexpected error: {error_msg}")
+        return {
+            "status": "error",
+            "message": f"Unexpected error: {error_msg}",
+            "request_id": request_id,
+        }
+
+    finally:
+        clear_request_id()
 
 
 @mcp.tool()
 def send_slack_success(
     message: str,
     channel: Optional[str] = None
-) -> str:
+) -> Dict[str, Any]:
     """
     Send a success notification to a Slack channel.
 
@@ -81,7 +136,7 @@ def send_slack_success(
         channel: Target channel (uses default if not specified)
 
     Returns:
-        Success message with timestamp and channel info
+        Structured response with status, data, and request_id
     """
     return send_slack_message(message, channel, "success")
 
@@ -90,7 +145,7 @@ def send_slack_success(
 def send_slack_warning(
     message: str,
     channel: Optional[str] = None
-) -> str:
+) -> Dict[str, Any]:
     """
     Send a warning notification to a Slack channel.
 
@@ -99,7 +154,7 @@ def send_slack_warning(
         channel: Target channel (uses default if not specified)
 
     Returns:
-        Success message with timestamp and channel info
+        Structured response with status, data, and request_id
     """
     return send_slack_message(message, channel, "warning")
 
@@ -108,7 +163,7 @@ def send_slack_warning(
 def send_slack_error(
     message: str,
     channel: Optional[str] = None
-) -> str:
+) -> Dict[str, Any]:
     """
     Send an error notification to a Slack channel.
 
@@ -117,7 +172,7 @@ def send_slack_error(
         channel: Target channel (uses default if not specified)
 
     Returns:
-        Success message with timestamp and channel info
+        Structured response with status, data, and request_id
     """
     return send_slack_message(message, channel, "error")
 
@@ -128,7 +183,7 @@ def configure_slack_notifications(
     default_channel: Optional[str] = None,
     timeout: Optional[int] = None,
     max_retries: Optional[int] = None
-) -> str:
+) -> Dict[str, Any]:
     """
     Configure Slack notifications globally.
 
@@ -139,8 +194,12 @@ def configure_slack_notifications(
         max_retries: Maximum retry attempts
 
     Returns:
-        Configuration success message
+        Structured response with status, message, and request_id
     """
+    request_id = set_request_id()
+    audit_logger = get_audit_logger()
+    start_time = audit_logger.start_timer()
+
     try:
         from .notifier import configure
         configure(
@@ -149,15 +208,80 @@ def configure_slack_notifications(
             timeout=timeout,
             max_retries=max_retries
         )
-        return "✅ Slack notifications configured successfully"
+
+        duration_ms = audit_logger.stop_timer(start_time)
+
+        # Log success
+        audit_logger.log_tool_call(
+            tool_name="configure_slack_notifications",
+            parameters={
+                "default_channel": default_channel,
+                "timeout": timeout,
+                "max_retries": max_retries,
+            },
+            request_id=request_id,
+            success=True,
+            duration_ms=duration_ms,
+        )
+
+        return {
+            "status": "success",
+            "message": "Slack notifications configured successfully",
+            "request_id": request_id,
+        }
+
     except SlackConfigError as e:
-        error_msg = f"❌ Configuration failed: {e}"
-        logger.error(error_msg)
-        raise ValueError(error_msg) from e
+        error_msg = mask_credentials(str(e))
+        duration_ms = audit_logger.stop_timer(start_time)
+
+        # Log failure
+        audit_logger.log_tool_call(
+            tool_name="configure_slack_notifications",
+            parameters={
+                "default_channel": default_channel,
+                "timeout": timeout,
+                "max_retries": max_retries,
+            },
+            request_id=request_id,
+            success=False,
+            error_message=error_msg,
+            duration_ms=duration_ms,
+        )
+
+        logger.error(f"Configuration failed: {error_msg}")
+        return {
+            "status": "error",
+            "message": error_msg,
+            "request_id": request_id,
+        }
+
     except Exception as e:
-        error_msg = f"❌ Unexpected error during configuration: {e}"
-        logger.error(error_msg)
-        raise ValueError(error_msg) from e
+        error_msg = mask_credentials(str(e))
+        duration_ms = audit_logger.stop_timer(start_time)
+
+        # Log failure
+        audit_logger.log_tool_call(
+            tool_name="configure_slack_notifications",
+            parameters={
+                "default_channel": default_channel,
+                "timeout": timeout,
+                "max_retries": max_retries,
+            },
+            request_id=request_id,
+            success=False,
+            error_message=error_msg,
+            duration_ms=duration_ms,
+        )
+
+        logger.error(f"Unexpected error during configuration: {error_msg}")
+        return {
+            "status": "error",
+            "message": f"Unexpected error: {error_msg}",
+            "request_id": request_id,
+        }
+
+    finally:
+        clear_request_id()
 
 
 def main():

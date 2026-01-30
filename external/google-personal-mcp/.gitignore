@@ -1,0 +1,30 @@
+# Environments
+.env
+.venv
+venv/
+env/
+
+# Byte-code files
+__pycache__/
+*.pyc
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+.Trashes
+
+# MCP specific generated files
+mcp.log
+mcp.pid
+
+# Google API Credentials
+credentials.json
+token.json
+*.egg-info
+session_*.md
+
+tmp/
+*.acc

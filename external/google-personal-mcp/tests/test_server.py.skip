@@ -1,0 +1,64 @@
+import unittest
+import asyncio
+from unittest.mock import patch, MagicMock
+from google_personal_mcp.server import mcp
+from fastmcp import FastMCP
+import inspect
+
+class TestMCPServer(unittest.TestCase):
+
+    def test_server_instance(self):
+        self.assertIsInstance(mcp, FastMCP)
+
+    def test_get_tools(self):
+        tools = asyncio.run(mcp.get_tools())
+        self.assertIn("list_sheets", tools)
+        self.assertIn("create_sheet", tools)
+        self.assertIn("get_sheet_status", tools)
+        self.assertIn("insert_prompt", tools)
+        self.assertIn("get_prompts", tools)
+        self.assertIn("initialize_readme_sheet", tools)
+
+    @patch('google_personal_mcp.server.get_sheets_service')
+    def test_list_sheets(self, mock_get_sheets_service):
+        mock_service = MagicMock()
+        mock_spreadsheets = MagicMock()
+        mock_get = MagicMock()
+        mock_execute = MagicMock()
+        mock_execute.return_value = {
+            'sheets': [
+                {'properties': {'title': 'Sheet1'}},
+                {'properties': {'title': 'Sheet2'}}
+            ]
+        }
+        mock_get.execute.return_value = mock_execute.return_value
+        mock_spreadsheets.get.return_value = mock_get
+        mock_service.spreadsheets.return_value = mock_spreadsheets
+        mock_get_sheets_service.return_value = mock_service
+
+        tools = asyncio.run(mcp.get_tools())
+        list_sheets_tool = tools['list_sheets']
+        
+        sheets = list_sheets_tool.fn()
+        self.assertEqual(sheets, ['Sheet1', 'Sheet2'])
+
+    @patch('google_personal_mcp.server.get_sheets_service')
+    def test_create_sheet(self, mock_get_sheets_service):
+        mock_service = MagicMock()
+        mock_spreadsheets = MagicMock()
+        mock_batch_update = MagicMock()
+        mock_execute = MagicMock()
+        mock_execute.return_value = {'spreadsheetId': 'test-id', 'replies': [{}]}
+        mock_batch_update.execute.return_value = mock_execute.return_value
+        mock_spreadsheets.batchUpdate.return_value = mock_batch_update
+        mock_service.spreadsheets.return_value = mock_spreadsheets
+        mock_get_sheets_service.return_value = mock_service
+
+        tools = asyncio.run(mcp.get_tools())
+        create_sheet_tool = tools['create_sheet']
+
+        result = create_sheet_tool.fn(new_sheet_name='New Sheet')
+        self.assertEqual(result, {'spreadsheetId': 'test-id', 'replies': [{}]})
+
+if __name__ == '__main__':
+    unittest.main()

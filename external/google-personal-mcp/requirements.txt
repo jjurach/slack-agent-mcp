@@ -1,0 +1,9 @@
+# Core dependencies - pinned versions for reproducibility
+mcp==0.5.1
+google-api-python-client==2.95.0
+google-auth-oauthlib==1.2.0
+google-auth==2.26.2
+httpx==0.25.2
+cyclopts==0.17.0
+pydantic==2.5.0
+anyio==4.1.1

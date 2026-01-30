@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "google-personal-mcp"
+version = "0.2.0"
+description = "MCP server for personal Google Drive and Sheets access"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "mcp>=1.0.0",
+    "google-api-python-client>=2.90",
+    "google-auth-oauthlib>=1.2",
+    "google-auth>=2.26",
+    "httpx>=0.25",
+    "cyclopts>=0.15",
+    "pydantic>=2.5",
+    "anyio>=4.1"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.1",
+    "pytest-mock>=3.12",
+    "ruff>=0.1",
+    "black>=23.12",
+    "mypy>=1.7",
+    "pylint>=3.0",
+    "pre-commit>=3.5",
+    "build>=1.0",
+    "twine>=4.0"
+]
+
+[project.scripts]
+google-personal-mcp = "google_personal_mcp.server:main"
+google-personal = "google_mcp_core.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+exclude = ["venv", ".git", "__pycache__", "build", "dist"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "--cov=src/google_mcp_core --cov=src/google_personal_mcp --cov-report=term-missing --cov-fail-under=60"

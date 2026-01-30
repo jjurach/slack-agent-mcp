@@ -1,0 +1,22 @@
+{
+  "profiles": {
+    "default": {
+      "bot_token_env": "SLACK_BOT_TOKEN",
+      "default_channel": "#general",
+      "timeout": 30,
+      "max_retries": 3
+    },
+    "work": {
+      "bot_token_env": "SLACK_WORK_BOT_TOKEN",
+      "default_channel": "#team-updates",
+      "timeout": 30,
+      "max_retries": 3
+    },
+    "personal": {
+      "bot_token_env": "SLACK_PERSONAL_BOT_TOKEN",
+      "default_channel": "#notifications",
+      "timeout": 30,
+      "max_retries": 3
+    }
+  }
+}

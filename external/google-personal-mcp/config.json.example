@@ -1,0 +1,26 @@
+{
+  "sheets": {
+    "prompts": {
+      "id": "1YOUR_SPREADSHEET_ID_HERE",
+      "profile": "default",
+      "description": "Main prompts and ideas storage"
+    },
+    "projects": {
+      "id": "1ANOTHER_SPREADSHEET_ID_HERE",
+      "profile": "default",
+      "description": "Project tracking and notes"
+    }
+  },
+  "drive_folders": {
+    "documents": {
+      "id": "YOUR_DRIVE_FOLDER_ID_HERE",
+      "profile": "default",
+      "description": "Personal documents folder"
+    },
+    "research": {
+      "id": "ANOTHER_FOLDER_ID_HERE",
+      "profile": "default",
+      "description": "Research materials and references"
+    }
+  }
+}

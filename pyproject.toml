@@ -29,12 +29,15 @@ dependencies = [
     "slack-sdk>=3.25.0",
     "python-dotenv>=1.0.0",
     "pydantic>=2.5.0",
+    "cyclopts>=2.0.0",
 ]
 
 [project.optional-dependencies]
 test = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
 ]
 dev = [
     "black",
@@ -49,7 +52,7 @@ Repository = "https://github.com/yourusername/slack-notifications"
 Issues = "https://github.com/yourusername/slack-notifications/issues"
 
 [project.scripts]
-slack-agent = "slack_agent.__main__:main"
+slack-agent-cli = "slack_notifications.cli:app"
 slack-mcp-server = "slack_notifications.mcp_server:main"
 
 [tool.setuptools.packages.find]

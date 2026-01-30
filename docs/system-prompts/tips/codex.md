@@ -50,7 +50,7 @@ codex resume <SESSION_ID>                 # Resume specific session
 codex resume                              # Interactive session picker
 
 # Aliases work with resumption
-codex-dev resume --last 'fix tests and close task'
+codex-dev resume --last 'fix tests and close project'
 codex-quick resume <SESSION_ID> 'summarize what we were working on'
 ```
 
@@ -151,7 +151,7 @@ codex-sys 'scan docs'
 |---------|---------|-------------|
 | **document-integrity-scan** | `codex-sys 'apply document-integrity-scan'` | Validate documentation correctness |
 | **bootstrap-project** | `codex-sys 'apply bootstrap-project'` | Initialize/update Agent Kernel |
-| **close-task** | `codex-dev 'apply close-task process'` | Properly complete and land work before ending session |
+| **close-project** | `codex-dev 'apply close-project process'` | Properly complete and land work before ending session |
 
 ### Common Process Commands
 
@@ -165,9 +165,9 @@ codex-sys 'run python3 docs/system-prompts/docscan.py and fix issues'
 # Bootstrap with workflow analysis
 codex-sys 'apply bootstrap-project with --analyze-workflow flag'
 
-# Close task (wrap up work properly)
-codex-dev 'apply close-task process'
-codex-dev 'close this task and commit changes'
+# Close project (wrap up work properly)
+codex-dev 'apply close-project process'
+codex-dev 'close this project and commit changes'
 ```
 
 ---
@@ -207,9 +207,9 @@ codex-dev 'fix the broken links reported in the scan'
 codex-sys 'apply document-integrity-scan process'
 ```
 
-### Pattern 4: Development → Close Task
+### Pattern 4: Development → Close Project
 
-**Complete development cycle with proper task closure:**
+**Complete development cycle with proper project closure:**
 
 ```bash
 # Step 1: Implement the feature
@@ -218,24 +218,24 @@ codex-dev 'implement user authentication with OAuth2'
 # Step 2: Run tests and verify
 codex-dev 'run tests and verify all pass'
 
-# Step 3: Close the task properly
-codex-dev 'apply close-task process'
+# Step 3: Close the project properly
+codex-dev 'apply close-project process'
 ```
 
-**What close-task does:**
+**What close-project does:**
 1. ✅ Verifies Definition of Done criteria
 2. ✅ Runs tests (aborts if non-trivial failures)
 3. ✅ Checks/creates change documentation
 4. ✅ Commits changes with proper attribution
 5. ✅ Reports final status
 
-**When to use close-task:**
+**When to use close-project:**
 - ✅ At end of development sessions
 - ✅ After completing a feature
 - ✅ Before switching contexts
 - ✅ When ready to commit work
 
-**When close-task will abort:**
+**When close-project will abort:**
 - ❌ Tests fail for non-trivial reasons (logic errors)
 - ❌ Unexpected files in source tree
 - ❌ Definition of Done criteria not met
@@ -255,10 +255,10 @@ codex resume <SESSION_ID>
 codex resume
 
 # Resume with follow-up instruction
-codex resume --last 'fix the test failures and apply close-task process'
+codex resume --last 'fix the test failures and apply close-project process'
 
 # Resume with aliases
-codex-dev resume --last 'continue and close task'
+codex-dev resume --last 'continue and close project'
 codex-quick resume <SESSION_ID> 'summarize what we were working on'
 ```
 
@@ -274,7 +274,7 @@ codex-dev 'implement OAuth authentication'
 codex resume <SESSION_ID>
 # Codex remembers everything from session 1
 # Fix issues, then:
-> apply close-task process
+> apply close-project process
 ```
 
 **Why this works:**

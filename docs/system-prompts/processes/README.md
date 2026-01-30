@@ -26,9 +26,9 @@ Unlike **workflows/** (which describe how agents execute tasks), **processes/** 
 
 **Automated via:** `docscan.py` (see below)
 
-### Close Task
+### Close Project
 
-**File:** [close-task.md](./close-task.md)
+**File:** [close-project.md](./close-project.md)
 
 **Description:** Comprehensive process for properly completing and landing work before ending an agentic session.
 
@@ -39,7 +39,7 @@ Unlike **workflows/** (which describe how agents execute tasks), **processes/** 
 4. **Git Commit** - Changes are properly saved with attribution
 5. **Abort Criteria** - When to stop and request human intervention
 
-**When to use:** At the end of any development session to ensure proper task closure.
+**When to use:** At the end of any development session to ensure proper project closure.
 
 ## Automated Tools
 

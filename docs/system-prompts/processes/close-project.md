@@ -1,4 +1,4 @@
-# Close Task Process
+# Close Project Process
 
 **Purpose:** Ensure all work is properly completed, verified, and documented before ending an agentic session.
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-The close-task process is the final step before ending an agentic session. It ensures:
+The close-project process is the final step before ending an agentic session. It ensures:
 
 1. **Definition of Done criteria are met** - All quality standards satisfied
 2. **Tests pass** - Code is verified to work correctly
@@ -18,11 +18,13 @@ The close-task process is the final step before ending an agentic session. It en
 
 This process applies the "landing the plan" checklist to ensure nothing is forgotten before the agent exits.
 
+**Note:** If the user requests to "close a task", interpret this as "close the project" (or "close the plan") and apply this process.
+
 ---
 
 ## When to Apply This Process
 
-Apply the close-task process:
+Apply the close-project process:
 
 - ✅ At the end of any development session involving code changes
 - ✅ After completing a project plan implementation
@@ -38,7 +40,7 @@ Apply the close-task process:
 
 ---
 
-## The Close-Task Checklist
+## The Close-Project Checklist
 
 ### Phase 1: Verify Definition of Done
 
@@ -109,7 +111,7 @@ pytest tests/ -v
 - Proceed to Phase 3
 
 **❌ Tests fail for non-trivial reasons** (logic errors, unexpected behavior, mysterious failures):
-- **ABORT THE CLOSE-TASK PROCESS**
+- **ABORT THE CLOSE-PROJECT PROCESS**
 - Do NOT proceed to commit
 - Report the failures to the user with full test output
 - Explain what's failing and why it needs human intervention
@@ -130,7 +132,7 @@ pytest tests/ -v
 **Example abort message:**
 
 ```
-ABORT: Close-Task Process Halted
+ABORT: Close-Project Process Halted
 
 Tests are failing for non-trivial reasons. Human intervention required.
 
@@ -148,7 +150,7 @@ Recommendation:
 2. Debug the root cause
 3. Fix implementation or tests as needed
 4. Re-run tests until they pass
-5. Then resume close-task process
+5. Then resume close-project process
 
 I have NOT committed any changes. The source tree is in the following state:
 [show git status]
@@ -194,6 +196,16 @@ Check that the change documentation includes:
 - [ ] **Known Issues:** Any caveats, limitations, or future work noted
 - [ ] **Integration with DoD:** Explicit checklist against Definition of Done
 
+#### 3.3 Archive Inbox Requests
+
+**Goal:** Ensure handled inbox requests are properly archived.
+
+- [ ] Identify any `dev_notes/inbox/` files addressed by this session
+- [ ] Move them to `dev_notes/inbox-archive/`
+- [ ] Rename with timestamp: `YYYY-MM-DD_HH-MM-SS_original-name.md`
+- [ ] Verify `dev_notes/inbox/` is clean (or only contains unrelated items)
+- [ ] *Note: This serves as a backstop if the logs-first workflow didn't already archive them.*
+
 ---
 
 ### Phase 4: Commit Changes
@@ -226,6 +238,7 @@ git add src/
 git add tests/
 git add requirements.txt
 git add dev_notes/changes/YYYY-MM-DD_HH-MM-SS_description.md
+git add dev_notes/inbox/ dev_notes/inbox-archive/  # If inbox items were archived
 ```
 
 **For documentation-only changes:**
@@ -233,12 +246,14 @@ git add dev_notes/changes/YYYY-MM-DD_HH-MM-SS_description.md
 # Stage docs and change documentation together
 git add docs/
 git add dev_notes/changes/YYYY-MM-DD_HH-MM-SS_description.md
+git add dev_notes/inbox/ dev_notes/inbox-archive/  # If inbox items were archived
 ```
 
 **For project plan updates:**
 ```bash
 # Stage completed plan status update
 git add dev_notes/project_plans/YYYY-MM-DD_HH-MM-SS_description.md
+git add dev_notes/inbox/ dev_notes/inbox-archive/  # If inbox items were archived
 ```
 
 #### 4.3 Create Commit
@@ -314,7 +329,7 @@ Check:
 Provide a concise summary:
 
 ```
-✅ Task Complete
+✅ Project Complete
 
 Summary:
 [1-2 sentence description of what was accomplished]
@@ -454,7 +469,7 @@ Next Steps:
 
 ### With Project Plan Workflow
 
-When closing a task that followed a project plan:
+When closing a project that followed a project plan:
 
 1. **Update plan status to `Completed`**
 2. **Reference plan in change documentation**
@@ -463,7 +478,7 @@ When closing a task that followed a project plan:
 
 ### With Definition of Done
 
-The close-task process enforces the Definition of Done:
+The close-project process enforces the Definition of Done:
 
 - Phase 1 explicitly checks DoD criteria
 - Phase 2 verifies tests (DoD requirement)
@@ -485,7 +500,7 @@ For documentation changes:
 ### Example 1: Successful Code Change Close
 
 ```
-Starting close-task process...
+Starting close-project process...
 
 Phase 1: Definition of Done
 ✅ Code follows project patterns
@@ -515,7 +530,7 @@ Staged:
 ✅ Committed: feat: add OAuth2 authentication support [a1b2c3d]
 
 Phase 5: Summary
-✅ Task Complete
+✅ Project Complete
 
 Summary: Implemented OAuth2 authentication with token refresh mechanism
 
@@ -534,7 +549,7 @@ Files Modified:
 ### Example 2: Abort on Test Failure
 
 ```
-Starting close-task process...
+Starting close-project process...
 
 Phase 1: Definition of Done
 ✅ All DoD criteria met
@@ -549,7 +564,7 @@ test_config.py::test_load_config FAILED
 
 ❌ Tests failing for non-trivial reasons
 
-ABORT: Close-Task Process Halted
+ABORT: Close-Project Process Halted
 
 Test Failures:
 1. test_audio_processing - AssertionError: Sample rate mismatch
@@ -577,7 +592,7 @@ Recommendation:
 2. Check if config schema changed in src/config.py:67
 3. Fix the issues
 4. Re-run: pytest tests/ -v
-5. Once tests pass, resume close-task process
+5. Once tests pass, resume close-project process
 
 Waiting for your guidance on how to proceed.
 ```
@@ -585,7 +600,7 @@ Waiting for your guidance on how to proceed.
 ### Example 3: Documentation Change (Ad-Hoc)
 
 ```
-Starting close-task process...
+Starting close-project process...
 
 Phase 1: Definition of Done
 ✅ File naming: lowercase-kebab.md
@@ -609,7 +624,7 @@ Staged:
 ✅ Committed: docs: add Claude Code workflow optimization guide [fb0c396]
 
 Phase 5: Summary
-✅ Task Complete
+✅ Project Complete
 
 Summary: Created comprehensive workflow optimization guide for Claude Code users
 
@@ -652,17 +667,14 @@ Files Created:
 - Are they test artifacts? (coverage reports, pytest cache)
 - Are they config auto-updates? (IDE settings)
 
-**If expected:** Include in commit
-**If unexpected:** Ask user for guidance
-
 ### "I made changes across multiple sessions"
 
-**Decision:** Close-task should be run at the end of the final session.
+**Decision:** Close-project should be run at the end of the final session.
 
 **Pattern:**
 - Session 1: Implement Phase 1, create partial change docs
 - Session 2: Implement Phase 2, update change docs
-- Session 3: Finish implementation, finalize change docs, run close-task
+- Session 3: Finish implementation, finalize change docs, run close-project
 
 ### "How do I resume a previous session?"
 
@@ -683,15 +695,15 @@ claude -r auth-refactor
 claude --resume
 claude -r
 
-# Continue with alias and apply close-task
-claude-dev --continue 'fix the test failures and apply close-task process'
+# Continue with alias and apply close-project
+claude-dev --continue 'fix the test failures and apply close-project process'
 ```
 
 **Best practice:**
 1. **Name your sessions** during work: Use `/rename session-name` inside Claude
 2. **Resume by name** later: `claude --resume session-name`
 3. Claude will have full context from the previous conversation
-4. Continue work and apply close-task when ready
+4. Continue work and apply close-project when ready
 
 **Example workflow:**
 
@@ -704,7 +716,7 @@ claude-dev --continue 'fix the test failures and apply close-task process'
 claude --resume oauth-implementation
 # Claude has full context from previous session
 # Fix issues, then:
-> apply close-task process
+> apply close-project process
 ```
 
 **Alternative: Manual context reconstruction** (if session was lost):

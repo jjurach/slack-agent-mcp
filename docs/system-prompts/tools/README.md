@@ -2,7 +2,7 @@
 
 This directory contains **generic, reusable, comprehensive workflow guides** for integrating different AI development tools with the `AGENTS.md` workflow.
 
-**Related:** Entry point files ([CLAUDE.md](../../../CLAUDE.md), [.aider.md](../../../.aider.md), [.clinerules](../../../.clinerules), [GEMINI.md](../../../GEMINI.md)) are minimal navigation hubs that redirect users to these comprehensive guides.
+**Related:** Entry point files ([.claude/CLAUDE.md](../../../.claude/CLAUDE.md), [.aider.md](../../../.aider.md), [.clinerules](../../../.clinerules), [.gemini/GEMINI.md](../../../.gemini/GEMINI.md)) are minimal navigation hubs that redirect users to these comprehensive guides.
 
 ## Available Guides
 
@@ -81,7 +81,7 @@ These guides are **reference material**, not mandatory loading for agents. Agent
 - Reference patterns and examples as needed
 - NOT treat them as imperative instructions to follow
 
-Mandatory tool instructions (how to use ExitPlanMode, basic workflow mapping) are located in `AGENTS.md` or tool-specific configuration files (`CLAUDE.md`, `GEMINI.md`, `.aider.md`, `.clinerules`).
+Mandatory tool instructions (how to use ExitPlanMode, basic workflow mapping) are located in `AGENTS.md` or tool-specific configuration files (`.claude/CLAUDE.md`, `.gemini/GEMINI.md`, `.aider.md`, `.clinerules`).
 
 ## Conditional References
 

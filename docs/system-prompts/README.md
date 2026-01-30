@@ -51,11 +51,11 @@ docs/system-prompts/
 
 The project uses "anemic" tool entry points in the root directory that redirect to comprehensive guides in `docs/system-prompts/tools/`.
 
-**Entry Point Files (Root):**
-- `AIDER.md` → `docs/system-prompts/tools/aider.md`
-- `CLAUDE.md` → `docs/system-prompts/tools/claude-code.md`
-- `CLINE.md` → `docs/system-prompts/tools/cline.md`
-- `GEMINI.md` → `docs/system-prompts/tools/gemini.md`
+**Entry Point Files:**
+- `.aider.md` → `docs/system-prompts/tools/aider.md`
+- `.claude/CLAUDE.md` → `docs/system-prompts/tools/claude-code.md`
+- `.clinerules` → `docs/system-prompts/tools/cline.md`
+- `.gemini/GEMINI.md` → `docs/system-prompts/tools/gemini.md`
 
 **Management:**
 These files are managed by `bootstrap.py`:

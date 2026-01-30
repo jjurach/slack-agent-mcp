@@ -603,9 +603,9 @@ class Bootstrap:
             os.path.join(self.project_root, "docs", "definition-of-done.md"),
             os.path.join(self.project_root, "docs", "workflows.md"),
             os.path.join(self.project_root, ".aider.md"),
-            os.path.join(self.project_root, "CLAUDE.md"),
+            os.path.join(self.project_root, ".claude", "CLAUDE.md"),
             os.path.join(self.project_root, ".clinerules"),
-            os.path.join(self.project_root, "GEMINI.md"),
+            os.path.join(self.project_root, ".gemini", "GEMINI.md"),
         ]
 
         gaps_found = []
@@ -625,9 +625,9 @@ class Bootstrap:
         # Mapping of tool names to their respective entry files
         tool_files = {
             "aider": ".aider.md",
-            "claude": "CLAUDE.md",
+            "claude": ".claude/CLAUDE.md",
             "cline": ".clinerules",
-            "gemini": "GEMINI.md"
+            "gemini": ".gemini/GEMINI.md"
         }
         changed = False
 
@@ -671,14 +671,14 @@ This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md)
-- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
-- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)
-- **Workflows:** [docs/workflows.md](docs/workflows.md)
+- **Read First:** [AGENTS.md](../AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](../docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/claude-code.md](../docs/system-prompts/tools/claude-code.md)
+- **Workflows:** [docs/workflows.md](../docs/workflows.md)
 
 ## For Claude Code Users
 
-The **[docs/system-prompts/tools/claude-code.md](docs/system-prompts/tools/claude-code.md)** guide covers:
+The **[docs/system-prompts/tools/claude-code.md](../docs/system-prompts/tools/claude-code.md)** guide covers:
 - Installation and discovery
 - Workflow mapping to AGENTS.md
 - All tools and approval gates
@@ -737,14 +737,14 @@ This project follows the **AGENTS.md** workflow.
 
 ## Quick Links
 
-- **Read First:** [AGENTS.md](AGENTS.md)
-- **Done Criteria:** [docs/definition-of-done.md](docs/definition-of-done.md)
-- **Tool Guide:** [docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)
-- **Workflows:** [docs/workflows.md](docs/workflows.md)
+- **Read First:** [AGENTS.md](../AGENTS.md)
+- **Done Criteria:** [docs/definition-of-done.md](../docs/definition-of-done.md)
+- **Tool Guide:** [docs/system-prompts/tools/gemini.md](../docs/system-prompts/tools/gemini.md)
+- **Workflows:** [docs/workflows.md](../docs/workflows.md)
 
 ## For Gemini Users
 
-The **[docs/system-prompts/tools/gemini.md](docs/system-prompts/tools/gemini.md)** guide covers:
+The **[docs/system-prompts/tools/gemini.md](../docs/system-prompts/tools/gemini.md)** guide covers:
 - Setup and discovery
 - Workflow mapping to AGENTS.md
 - Multimodal capabilities and ReAct loop
@@ -770,9 +770,9 @@ Last Updated: {timestamp}
         # Map tool names to their respective entry files
         tool_files = {
             "aider": ".aider.md",
-            "claude": "CLAUDE.md",
+            "claude": ".claude/CLAUDE.md",
             "cline": ".clinerules",
-            "gemini": "GEMINI.md"
+            "gemini": ".gemini/GEMINI.md"
         }
         entry_file_name = tool_files.get(tool_name, f"{tool_name.upper()}.md")
         entry_file = os.path.join(self.project_root, entry_file_name)
@@ -859,9 +859,9 @@ Last Updated: {timestamp}
 
             filename = {
                 "aider": ".aider.md",
-                "claude": "CLAUDE.md",
+                "claude": ".claude/CLAUDE.md",
                 "cline": ".clinerules",
-                "gemini": "GEMINI.md"
+                "gemini": ".gemini/GEMINI.md"
             }.get(tool)
 
             if result["issues"]:

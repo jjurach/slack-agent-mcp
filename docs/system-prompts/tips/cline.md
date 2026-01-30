@@ -68,14 +68,42 @@ Add these to your `~/.bashrc` or `~/.zshrc`:
 ```bash
 # Quick task management
 alias cline-list='cline task list'
-alias cline-resume='CLINE_APPROVAL_MODE=auto cline task open'
+alias cline-resume='cline task open'
 alias cline-view='cline task view'
-alias cline-new='CLINE_APPROVAL_MODE=auto cline task new'
-alias cline-chat='CLINE_APPROVAL_MODE=auto cline task chat'
+
+# Development tasks (auto-approved)
+alias cline-dev='cline --yolo --mode act'
+alias cline-quick='cline --yolo --mode act'
 
 # System-prompts processes
-alias cline-sys='CLINE_APPROVAL_MODE=auto cline task new "apply system-prompts process"'
-alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
+alias cline-sys='cline --yolo --mode act'
+
+# One-shot commands
+alias cline-ask='cline --yolo --mode act'
+```
+
+**Flag explanations:**
+- `--yolo`: Auto-approve all actions (skip permission prompts)
+- `--mode act`: Use Act Mode for execution
+- Direct description/command follows flags (no `task new` needed)
+
+**Usage examples:**
+```bash
+# Create development task
+cline-dev 'implement OAuth authentication'
+
+# Quick task
+cline-quick 'refactor auth module'
+
+# System-prompts process
+cline-sys 'apply document-integrity-scan process'
+
+# One-shot command
+cline-ask 'explain this error'
+
+# Task management (without flags)
+cline-list                      # List recent tasks
+cline-resume 1760501486669     # Resume specific task
 ```
 
 ---
@@ -162,6 +190,14 @@ cline config set openai.apiKey YOUR_API_KEY
 cline config set model claude-sonnet-4-5
 ```
 
+### Command Line Flags
+
+Key flags for CLI usage:
+- `--yolo`: Auto-approve all actions (no confirmation prompts)
+- `--mode <plan|act>`: Set workflow mode (default: plan)
+- `--no-interactive`: Run without additional prompts
+- `--oneshot`: Execute a single command and exit
+
 ### Plan and Act Modes
 
 Cline has two-phase workflow modes:
@@ -201,8 +237,8 @@ cline task new 'apply document-integrity-scan process and fix issues'
 # Bootstrap project
 cline task new 'apply bootstrap-project process'
 
-# Close task
-cline task new 'apply close-task process'
+# Close project
+cline task new 'apply close-project process'
 ```
 
 **Via VS Code Extension:**
@@ -218,7 +254,7 @@ cline task new 'apply close-task process'
 |---------|---------|-------------|
 | **document-integrity-scan** | `apply document-integrity-scan` | Validate documentation correctness |
 | **bootstrap-project** | `apply bootstrap-project` | Initialize/update Agent Kernel |
-| **close-task** | `apply close-task process` | Properly complete and land work |
+| **close-project** | `apply close-project process` | Properly complete and land work |
 
 ---
 
@@ -251,7 +287,7 @@ cline task new 'implement user authentication with OAuth2'
 cline task open <TASK_ID>
 ```
 
-### Pattern 3: Development → Close Task
+### Pattern 3: Development → Close Project
 
 ```bash
 # Step 1: Implement feature
@@ -260,11 +296,11 @@ cline task new 'implement OAuth authentication'
 # Step 2: Verify and test
 # (Cline runs tests automatically if configured)
 
-# Step 3: Close task properly
-cline task new 'apply close-task process'
+# Step 3: Close project properly
+cline task new 'apply close-project process'
 ```
 
-**What close-task does:**
+**What close-project does:**
 1. ✅ Verifies Definition of Done criteria
 2. ✅ Runs tests (aborts if non-trivial failures)
 3. ✅ Checks/creates change documentation

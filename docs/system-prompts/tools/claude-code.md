@@ -37,12 +37,12 @@ claude add user authentication system
 ## How Claude Code Discovers Project Instructions
 
 When you start Claude Code in your project:
-1. It looks for `CLAUDE.md` in the current directory
+1. It looks for `CLAUDE.md` in the current directory (or `.claude/CLAUDE.md`)
 2. Reads it to understand project-specific instructions
 3. Uses CLAUDE.md to reference AGENTS.md workflow
 
 **Your current setup:**
-- ✅ `CLAUDE.md` exists and references AGENTS.md
+- ✅ `.claude/CLAUDE.md` exists and references AGENTS.md
 - ✅ AGENTS.md defines the core workflow
 - ✅ Tools are fully integrated
 
@@ -486,17 +486,9 @@ After docs: Read(...) to verify clarity
 Claude Code uses a **hierarchy of documents**:
 
 ```
-CLAUDE.md (entry point for this tool)
+.claude/CLAUDE.md (entry point for this tool)
 ↓
 AGENTS.md (core workflow - all projects)
-↓
-`tools-capabilities.md` (what each tool can do)
-↓
-`workflow-mapping.md` (how AGENTS.md maps to Claude Code)
-↓
-`prompt-patterns.md` (prompt structures that work)
-↓
-This document (Claude Code specifics)
 ```
 
 **For any task:**

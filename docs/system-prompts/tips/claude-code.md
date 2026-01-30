@@ -49,7 +49,7 @@ claude --resume oauth-impl           # Resume named session
 claude -r oauth-impl                 # Short form
 
 # Aliases work with resumption flags
-claude-dev --continue 'fix tests and close task'
+claude-dev --continue 'fix tests and close project'
 claude-quick --continue 'summarize what we were working on'
 claude-sys -c 'apply document-integrity-scan'
 claude-think --resume complex-refactor 'continue architectural review'
@@ -157,7 +157,7 @@ claude-sys 'scan docs'
 |---------|---------|-------------|
 | **document-integrity-scan** | `claude-sys 'apply document-integrity-scan'` | Validate documentation correctness |
 | **bootstrap-project** | `claude-sys 'apply bootstrap-project'` | Initialize/update Agent Kernel |
-| **close-task** | `claude-dev 'apply close-task process'` | Properly complete and land work before ending session |
+| **close-project** | `claude-dev 'apply close-project process'` | Properly complete and land work before ending session |
 
 ### Common Process Commands
 
@@ -174,9 +174,9 @@ claude-sys 'apply bootstrap-project with --analyze-workflow flag'
 # Check current bootstrap state
 claude-sys 'what is the current bootstrap state?'
 
-# Close task (wrap up work properly)
-claude-dev 'apply close-task process'
-claude-dev 'close this task and commit changes'
+# Close project (wrap up work properly)
+claude-dev 'apply close-project process'
+claude-dev 'close this project and commit changes'
 ```
 
 ---
@@ -216,9 +216,9 @@ claude-dev 'fix the broken links reported in the scan'
 claude-sys 'apply document-integrity-scan process'
 ```
 
-### Pattern 4: Development → Close Task
+### Pattern 4: Development → Close Project
 
-**Complete development cycle with proper task closure:**
+**Complete development cycle with proper project closure:**
 
 ```bash
 # Step 1: Implement the feature
@@ -227,24 +227,24 @@ claude-dev 'implement user authentication with OAuth2'
 # Step 2: Run tests and verify
 claude-dev 'run tests and verify all pass'
 
-# Step 3: Close the task properly
-claude-dev 'apply close-task process'
+# Step 3: Close the project properly
+claude-dev 'apply close-project process'
 ```
 
-**What close-task does:**
+**What close-project does:**
 1. ✅ Verifies Definition of Done criteria
 2. ✅ Runs tests (aborts if non-trivial failures)
 3. ✅ Checks/creates change documentation
 4. ✅ Commits changes with proper attribution
 5. ✅ Reports final status
 
-**When to use close-task:**
+**When to use close-project:**
 - ✅ At end of development sessions
 - ✅ After completing a feature
 - ✅ Before switching contexts
 - ✅ When ready to commit work
 
-**When close-task will abort:**
+**When close-project will abort:**
 - ❌ Tests fail for non-trivial reasons (logic errors)
 - ❌ Unexpected files in source tree
 - ❌ Definition of Done criteria not met
@@ -267,7 +267,7 @@ claude --resume
 claude -r
 
 # Resume with alias and continue work
-claude-dev --continue 'fix the test failures and apply close-task process'
+claude-dev --continue 'fix the test failures and apply close-project process'
 ```
 
 **Best practice workflow:**
@@ -282,7 +282,7 @@ claude-dev 'implement OAuth authentication'
 claude --resume oauth-implementation
 # Claude remembers everything from session 1
 # Fix issues, then:
-> apply close-task process
+> apply close-project process
 ```
 
 **Why this works:**
@@ -309,7 +309,7 @@ claude --resume feature-name --fork-session
 ```bash
 # Continue with sonnet (dev work)
 claude-dev --continue
-claude-dev -c 'fix the tests and apply close-task'
+claude-dev -c 'fix the tests and apply close-project'
 
 # Continue with haiku (quick check)
 claude-quick --continue 'what were we working on?'
@@ -511,20 +511,20 @@ shift
 case "$PROFILE" in
   sys)
     exec claude --model sonnet --dangerously-skip-permissions "$@"
-    ;;
+    ;; 
   quick)
     exec claude --model haiku --dangerously-skip-permissions "$@"
-    ;;
+    ;; 
   dev)
     exec claude --model sonnet --dangerously-skip-permissions "$@"
-    ;;
+    ;; 
   think)
     exec claude --model opus --dangerously-skip-permissions "$@"
-    ;;
+    ;; 
   *)
     echo "Unknown profile: $PROFILE"
     exit 1
-    ;;
+    ;; 
 esac
 ```
 
@@ -629,7 +629,7 @@ claude-dev 'show me a summary of changes and suggest a commit message, but do no
 - [`docs/system-prompts/tools/claude-code.md`](tools/claude-code.md) - Comprehensive Claude Code guide
 - [`docs/system-prompts/processes/README.md`](processes/README.md) - Available processes
 - [`docs/system-prompts/workflows/README.md`](workflows/README.md) - Available workflows
-- [CLAUDE.md](../../../CLAUDE.md) - Claude Code entry point for this project
+- [.claude/CLAUDE.md](../../../.claude/CLAUDE.md) - Claude Code entry point for this project
 
 ---
 

@@ -38,10 +38,10 @@ gemini
 
 ## How Gemini Discovers Project Instructions
 
-Gemini looks for a `GEMINI.md` file in the project root. This file serves the same purpose as `CLAUDE.md` in other tools.
+Gemini looks for a `GEMINI.md` file in the project. This project uses the namespaced `.gemini/GEMINI.md` to keep the root directory clean.
 
 **Discovery:**
-1. **Project Root:** `./GEMINI.md` (This is what we use)
+1. **Project-specific:** `./.gemini/GEMINI.md` (This is what we use)
 2. **Home Directory:** `~/.gemini/GEMINI.md` (fallback)
 
 ## Model Selection & Capabilities
@@ -101,15 +101,15 @@ New context-driven development approach:
 
 | Feature | Claude Code | Gemini CLI |
 |---|---|---|
-| **Entry Point** | `CLAUDE.md` | `GEMINI.md` |
+| **Entry Point** | `.claude/CLAUDE.md` | `.gemini/GEMINI.md` |
 | **Approval** | `ExitPlanMode()` (Explicit) | **Conversational** ("Do you approve?") |
 | **Git** | `Bash(git ...)` | `run_shell_command(git ...)` |
 | **Task Tracking** | Built-in (`TaskCreate`) | **Manual** (via `dev_notes/`) |
 | **Context** | ~200k tokens | ~1M+ tokens (1.5 Pro) |
 
-## Configuration: GEMINI.md
+## Configuration: .gemini/GEMINI.md
 
-Create a `GEMINI.md` file in your project root with the following content:
+Create a `GEMINI.md` file in `.gemini/GEMINI.md` with the following content:
 
 ```markdown
 # Second Voice - Gemini Instructions
@@ -204,7 +204,8 @@ Gemini (via built-in web search):
 **Problem:** "GEMINI.md not found"
 **Solution:** Create a GEMINI.md file:
 ```bash
-cat > GEMINI.md << 'EOF'
+mkdir -p .gemini
+cat > .gemini/GEMINI.md << 'EOF'
 # Project - Gemini Instructions
 
 This project follows AGENTS.md workflow.
@@ -242,7 +243,7 @@ User: "In src/api.py, after the 'def get_user()' function (around line 45),
 - ✅ ReAct loop architecture for reasoning
 - ✅ MCP (Model Context Protocol) support for custom integrations
 - ✅ Conductor extension preview (structured development)
-- ✅ Native AGENTS.md support via GEMINI.md
+- ✅ Native AGENTS.md support via .gemini/GEMINI.md
 - ✅ Web search grounding (for best practices, patterns)
 - ✅ Compatible with `second_voice` workflow
 
@@ -255,7 +256,7 @@ User: "In src/api.py, after the 'def get_user()' function (around line 45),
 | **Models** | Claude Opus | ✅ Gemini 3 Flash/Pro/2.5 |
 | **Approval** | ExitPlanMode (explicit) | Conversational (flexible) |
 | **Context** | ~200k tokens | Model-dependent (1M+) |
-| **Entry Point** | CLAUDE.md | GEMINI.md |
+| **Entry Point** | .claude/CLAUDE.md | .gemini/GEMINI.md |
 | **Web Search** | Via WebSearch tool | ✅ Built-in |
 | **MCP Support** | Via tools | ✅ Native |
 | **ReAct Loop** | N/A | ✅ Yes (reasoning shown) |
@@ -266,7 +267,7 @@ User: "In src/api.py, after the 'def get_user()' function (around line 45),
 ```bash
 # Configuration
 ~/.gemini/config.yaml       # Global config
-./GEMINI.md                 # Project instructions
+./.gemini/GEMINI.md         # Project instructions
 ./dev_notes/                # Workflow artifacts
 
 # Environment Variables

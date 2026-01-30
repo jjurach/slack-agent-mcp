@@ -31,19 +31,19 @@ alias claude-think='claude --model opus --dangerously-skip-permissions'
 # See: docs/system-prompts/tips/gemini.md
 
 # System-prompts processes (use Flash for speed)
-alias gemini-sys='GEMINI_MODEL=gemini-3-flash gemini --yolo'
+alias gemini-sys='GEMINI_MODEL=gemini-3-flash-preview gemini --yolo --prompt'
 
 # Quick exploration (use Flash for low latency)
-alias gemini-quick='GEMINI_MODEL=gemini-3-flash gemini --yolo'
+alias gemini-quick='GEMINI_MODEL=gemini-3-flash-preview gemini --yolo --prompt'
 
 # Full dev work (use Pro for better reasoning)
-alias gemini-dev='GEMINI_MODEL=gemini-3-pro gemini --yolo'
+alias gemini-dev='GEMINI_MODEL=gemini-3-pro-preview gemini --yolo --prompt'
 
 # Deep reasoning/Architecture (use Pro for max capability)
-alias gemini-think='GEMINI_MODEL=gemini-3-pro gemini --yolo'
+alias gemini-think='GEMINI_MODEL=gemini-3-pro-preview gemini --yolo --prompt'
 
 # Debug mode
-alias gemini-debug='GEMINI_DEBUG=true gemini --yolo'
+alias gemini-debug='GEMINI_DEBUG=true gemini --yolo --prompt'
 
 # ============================================================================
 # Codex CLI Aliases
@@ -67,16 +67,20 @@ alias codex-think='codex --model gpt-5.2-codex --approval-mode full-auto'
 # ============================================================================
 # See: docs/system-prompts/tips/cline.md
 
-# Quick task management
+# Quick task management (no auto-approval)
 alias cline-list='cline task list'
-alias cline-resume='CLINE_APPROVAL_MODE=auto cline task open'
+alias cline-resume='cline task open'
 alias cline-view='cline task view'
-alias cline-new='CLINE_APPROVAL_MODE=auto cline task new'
-alias cline-chat='CLINE_APPROVAL_MODE=auto cline task chat'
+
+# Development tasks (auto-approved)
+alias cline-dev='cline --yolo --mode act'
+alias cline-quick='cline --yolo --mode act'
 
 # System-prompts processes
-alias cline-sys='CLINE_APPROVAL_MODE=auto cline task new "apply system-prompts process"'
-alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
+alias cline-sys='cline --yolo --mode act'
+
+# One-shot commands
+alias cline-ask='cline --yolo --mode act'
 
 # ============================================================================
 # Usage Examples
@@ -89,22 +93,24 @@ alias cline-dev='CLINE_APPROVAL_MODE=auto cline task new "development task"'
 #   claude-think 'design the caching architecture'
 #
 # Gemini CLI:
-#   gemini-sys (then ask: 'apply document-integrity-scan process')
-#   gemini-dev (then ask: 'implement OAuth authentication')
-#   gemini-quick (then ask: 'find all error handling code')
-#   gemini-think (then ask: 'design the caching architecture')
+#   gemini-sys 'apply document-integrity-scan process'
+#   gemini-dev 'implement OAuth authentication'
+#   gemini-quick 'find all error handling code'
+#   gemini-think 'design the caching architecture'
 #
 # Codex CLI:
-#   codex-sys 'apply close-task process'
+#   codex-sys 'apply close-project process'
 #   codex-dev 'refactor authentication module'
 #   codex-quick 'list all TODOs'
 #   codex-think 'review system architecture'
 #
 # Cline:
-#   cline-list
-#   cline-resume 1760501486669
-#   cline-new 'implement feature X'
-#   cline-sys
+#   cline-list                                             # List recent tasks
+#   cline-resume 1760501486669                            # Resume a task
+#   cline-dev 'implement OAuth authentication'            # Create development task (auto-approved)
+#   cline-quick 'refactor auth module'                    # Quick task (auto-approved)
+#   cline-sys 'apply document-integrity-scan process'     # Apply system-prompts process
+#   cline-ask 'explain this error'                        # One-shot command (auto-approved)
 #
 # Session Resumption:
 #   claude --continue                    # Resume most recent

@@ -44,10 +44,10 @@ CONDITIONAL_MARKERS = {
 # Safe targets from system-prompts (entry points that always exist in AGENTS.md projects)
 ENTRY_POINTS = {
     "AGENTS.md",
-    "CLAUDE.md",
+    ".claude/CLAUDE.md",
     ".clinerules",
     ".aider.md",
-    "GEMINI.md",
+    ".gemini/GEMINI.md",
 }
 
 # Directories to exclude from plain-text reference checks (transient/working documents)
@@ -81,6 +81,7 @@ ALLOWED_BACK_REFERENCES = {
     "docs/system-prompts/tools/claude-code.md": {
         "../../definition-of-done.md",
         "../../mandatory.md",
+        "../../../.claude/CLAUDE.md",
     },
     "docs/system-prompts/tools/cline.md": {
         "../../definition-of-done.md",
@@ -89,12 +90,13 @@ ALLOWED_BACK_REFERENCES = {
     "docs/system-prompts/tools/gemini.md": {
         "../../definition-of-done.md",
         "../../mandatory.md",
+        "../../../.gemini/GEMINI.md",
     },
     "docs/system-prompts/tools/aider.md": {
         "../../definition-of-done.md",
         "../../mandatory.md",
     },
-    "docs/system-prompts/processes/close-task.md": {
+    "docs/system-prompts/processes/close-project.md": {
         "../../definition-of-done.md",
     },
 }
@@ -485,7 +487,7 @@ class DocumentScanner:
         # Pattern for potential plain-text references (words containing .md or path-like structures)
         # This includes: docs/file.md, AGENTS.md, ./file.md, ../file.md, etc.
         plaintext_pattern = re.compile(
-            r"(?:^|[^`\[])(?:(?:docs/|\.{0,2}/)?(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+\.md|(?:AGENTS|CLAUDE|CLINE|AIDER|GEMINI)\.md)(?:[^)\]`]|$)"
+            r"(?:^|[^`\[])(?:(?:docs/|\.{0,2}/)?(?:[a-zA-Z0-9_-]+/)*[a-zA-Z0-9_-]+\.md|(?:AGENTS|\.claude/CLAUDE|CLINE|AIDER|\.gemini/GEMINI)\.md)(?:[^)\]`]|$)"
         )
 
         all_md_files = list(self.project_root.rglob("*.md"))
@@ -548,7 +550,7 @@ class DocumentScanner:
                     # Skip special root files that are often referenced in plain text
                     ignored_files = {
                         "README.md", "AGENTS.md", "CLAUDE.md", "AIDER.md",
-                        "GEMINI.md", "CLINE.md", "TOOL-X.md"
+                        "GEMINI.md", "CLINE.md", "TOOL-X.md", ".aider.md", ".clinerules"
                     }
                     if ref in ignored_files or ref.split("/")[-1] in ignored_files:
                         continue
@@ -580,10 +582,10 @@ class DocumentScanner:
 
         # Map entry files to their corresponding guides
         tool_files = {
-            "CLAUDE.md": "claude-code.md",
+            ".claude/CLAUDE.md": "claude-code.md",
             ".aider.md": "aider.md",
             ".clinerules": "cline.md",
-            "GEMINI.md": "gemini.md",
+            ".gemini/GEMINI.md": "gemini.md",
         }
 
         errors = 0

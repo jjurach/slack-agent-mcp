@@ -107,9 +107,9 @@ gemini-sys
 gemini-sys
 > Apply bootstrap-project process to update system prompts.
 
-# Close task (wrap up work properly)
+# Close project (wrap up work properly)
 gemini-dev
-> Apply close-task process to verify work and prepare for commit.
+> Apply close-project process to verify work and prepare for commit.
 ```
 
 ---
@@ -155,9 +155,9 @@ gemini-dev
 
 ## Project-Specific Settings
 
-### `GEMINI.md` Configuration
+### `.gemini/GEMINI.md` Configuration
 
-Ensure your `GEMINI.md` in the project root is up to date. It drives Gemini's context.
+Ensure your `GEMINI.md` in `.gemini/GEMINI.md` is up to date. It drives Gemini's context.
 
 ```markdown
 # Second Voice - Gemini Instructions

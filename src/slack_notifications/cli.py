@@ -9,7 +9,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from cyclopts import App, Parameter
+from cyclopts import App
+from dotenv import load_dotenv
 
 from .config import AppConfig, SlackConfig
 from .logging import configure_logging, get_audit_logger
@@ -51,9 +52,7 @@ def list_profiles():
 
 
 @config_app.command
-def show(
-    profile: str = Parameter(default="default", help="Profile name to display")
-):
+def show(profile: str = "default"):
     """Display configuration for a specific profile."""
     try:
         app_config = AppConfig.auto_load()
@@ -168,17 +167,22 @@ def init():
 
 @test_app.command
 def send_message(
-    message: str = Parameter(help="Message to send"),
-    profile: str = Parameter(default="default", help="Profile to use"),
-    channel: Optional[str] = Parameter(default=None, help="Channel override"),
+    message: str,
+    profile: str = "default",
+    channel: Optional[str] = None,
 ):
     """Send a test message to Slack."""
     try:
         # Load configuration for the profile
         config = SlackConfig.from_profile(profile)
 
-        # Create notifier
-        notifier = SlackNotifier(config=config)
+        # Create notifier with individual config values
+        notifier = SlackNotifier(
+            bot_token=config.bot_token,
+            default_channel=config.default_channel,
+            timeout=config.timeout,
+            max_retries=config.max_retries,
+        )
 
         # Send message
         print(f"Sending message via profile '{profile}'...")
@@ -194,9 +198,7 @@ def send_message(
 
 
 @test_app.command
-def auth(
-    profile: str = Parameter(default="default", help="Profile to test")
-):
+def auth(profile: str = "default"):
     """Test Slack authentication."""
     try:
         config = SlackConfig.from_profile(profile)
@@ -204,9 +206,6 @@ def auth(
         print(f"Testing authentication for profile '{profile}'...")
         print(f"  Token env: {AppConfig.auto_load().profiles[profile].bot_token_env}")
         print(f"  Token:     {config.bot_token[:10]}...")
-
-        # Create notifier and test connection
-        notifier = SlackNotifier(config=config)
 
         # Try to get bot info
         from slack_sdk import WebClient
@@ -225,9 +224,7 @@ def auth(
 
 
 @test_app.command
-def channels(
-    profile: str = Parameter(default="default", help="Profile to use")
-):
+def channels(profile: str = "default"):
     """List available Slack channels."""
     try:
         config = SlackConfig.from_profile(profile)
@@ -274,8 +271,8 @@ def channels(
 
 @debug_app.command
 def audit_log(
-    tail: int = Parameter(default=10, help="Number of recent entries to show"),
-    filter_tool: Optional[str] = Parameter(default=None, help="Filter by tool name"),
+    tail: int = 10,
+    filter_tool: Optional[str] = None,
 ):
     """Display recent audit log entries."""
     audit_logger = get_audit_logger()
@@ -334,9 +331,7 @@ def audit_log(
 
 
 @debug_app.command
-def show_config(
-    profile: str = Parameter(default="default", help="Profile to display")
-):
+def show_config(profile: str = "default"):
     """Show resolved configuration for debugging."""
     try:
         # Enable debug mode temporarily
@@ -365,9 +360,7 @@ def show_config(
 
 
 @debug_app.command
-def check_permissions(
-    profile: str = Parameter(default="default", help="Profile to check")
-):
+def check_permissions(profile: str = "default"):
     """Check bot permissions in Slack workspace."""
     try:
         config = SlackConfig.from_profile(profile)
@@ -403,5 +396,12 @@ app.command(test_app, name="test")
 app.command(debug_app, name="debug")
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Main entry point for the CLI."""
+    # Load .env file from current directory
+    load_dotenv()
     app()
+
+
+if __name__ == "__main__":
+    main()

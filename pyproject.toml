@@ -52,7 +52,7 @@ Repository = "https://github.com/yourusername/slack-notifications"
 Issues = "https://github.com/yourusername/slack-notifications/issues"
 
 [project.scripts]
-slack-agent-cli = "slack_notifications.cli:app"
+slack-agent-cli = "slack_notifications.cli:main"
 slack-mcp-server = "slack_notifications.mcp_server:main"
 
 [tool.setuptools.packages.find]

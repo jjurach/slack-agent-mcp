@@ -295,6 +295,26 @@ All interactions are logged to stdout with CST timestamps:
 
 See [docs/slack-agent-usage.md](docs/slack-agent-usage.md) for complete setup and usage instructions.
 
+## Documentation
+
+### For AI Agents
+- **[AGENTS.md](AGENTS.md)** - Mandatory workflow for AI agents (start here!)
+- **[Definition of Done](docs/definition-of-done.md)** - Quality standards and completion criteria
+- **[Workflows](docs/workflows.md)** - Development workflows
+
+### For Developers
+- **[Architecture](docs/architecture.md)** - System architecture and design
+- **[Implementation Reference](docs/implementation-reference.md)** - Code patterns and practices
+- **[MCP Service Setup](docs/mcp-service-setup.md)** - MCP server configuration
+- **[Slack API Setup](docs/slack-api-setup.md)** - Slack integration guide
+- **[Slack Agent Usage](docs/slack-agent-usage.md)** - Slack agent documentation
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+
+### System Documentation
+- **[Agent Kernel README](docs/system-prompts/README.md)** - Complete Agent Kernel documentation
+- **[Universal Definition of Done](docs/system-prompts/principles/definition-of-done.md)** - Agent Kernel universal requirements
+- **[Python Definition of Done](docs/system-prompts/languages/python/definition-of-done.md)** - Python-specific standards
+
 ## Development
 
 ### Setup

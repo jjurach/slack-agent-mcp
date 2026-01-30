@@ -200,7 +200,7 @@ AI Agent: I need to notify the team about the deployment.
 MCP Tool Call: send_slack_success("🚀 Production deployment completed successfully!", "#devops")
 ```
 
-See [doc/mcp-service-setup.md](doc/mcp-service-setup.md) for detailed setup and usage instructions.
+See [docs/mcp-service-setup.md](docs/mcp-service-setup.md) for detailed setup and usage instructions.
 
 ## Model Configuration (Conceptual Change)
 
@@ -245,7 +245,7 @@ backends:
 - **Cost Optimization**: Route to cheapest available provider
 - **Load Balancing**: Distribute requests across multiple backends
 
-See [doc/model-backend-concept.md](doc/model-backend-concept.md) for complete conceptual documentation and [examples/model_config_example.yaml](examples/model_config_example.yaml) for configuration examples.
+See [docs/model-backend-concept.md](docs/model-backend-concept.md) for complete conceptual documentation and [examples/model_config_example.yaml](examples/model_config_example.yaml) for configuration examples.
 
 ## Slack Agent
 
@@ -293,7 +293,7 @@ All interactions are logged to stdout with CST timestamps:
 2025-12-25 11:00:00 CST - slack_agent - INFO - [2025-12-25 11:00:00 CST] RESPONSE - Sent time to channel C1234567890: The current time is 11:00:00 AM CST on 2025-12-25
 ```
 
-See [doc/slack-agent-usage.md](doc/slack-agent-usage.md) for complete setup and usage instructions.
+See [docs/slack-agent-usage.md](docs/slack-agent-usage.md) for complete setup and usage instructions.
 
 ## Development
 

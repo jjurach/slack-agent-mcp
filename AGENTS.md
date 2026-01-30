@@ -7,7 +7,7 @@
 Before using this document, replace the following placeholders with your project-specific values:
 
 - `this Project` - Your project's name (appears in title and throughout document)
-- `chatvault/doc/project-status.md` - Your project status/punchlist file name
+- `chatvault/docs/project-status.md` - Your project status/punchlist file name
 - `python` - Primary programming language (e.g., TypeScript, Python, Java)
 - `Python` - Backend runtime (e.g., Node.js, Python, Java)
 
@@ -514,13 +514,13 @@ COMMIT;
 ### Project Structure (Planned/Current)
 **AI AGENT INSTRUCTIONS:** These directories may not exist yet. Create them as needed.
 
-- Documentation: `chatvault/doc/project-status.md` (to be created)
+- Documentation: `chatvault/docs/project-status.md` (to be created)
 
 ### Key Technologies
 - Backend: Python, FastAPI
 
 ### Important Files (Planned)
-- `chatvault/doc/project-status.md` - Overall project status (to be created)
+- `chatvault/docs/project-status.md` - Overall project status (to be created)
 - `project_plan_rules.md` - This file
 - `dev_notes/` - All development documentation
 

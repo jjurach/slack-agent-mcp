@@ -157,7 +157,17 @@ class AppConfig(BaseModel):
             pass
 
         # Fall back to default profile from environment
-        return cls()
+        load_dotenv()
+        return cls(
+            profiles={
+                "default": ProfileConfig(
+                    bot_token_env="SLACK_BOT_TOKEN",
+                    default_channel=os.getenv("SLACK_DEFAULT_CHANNEL", "#general"),
+                    timeout=int(os.getenv("SLACK_TIMEOUT", "30")),
+                    max_retries=int(os.getenv("SLACK_MAX_RETRIES", "3")),
+                )
+            }
+        )
 
 
 class SlackConfig(BaseModel):

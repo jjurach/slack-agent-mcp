@@ -18,4 +18,4 @@ The **[docs/system-prompts/tools/claude-code.md](../docs/system-prompts/tools/cl
 - Common patterns and examples
 
 ---
-Last Updated: 2026-01-30
+Last Updated: 2026-02-01

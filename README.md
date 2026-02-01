@@ -337,9 +337,57 @@ pytest
 python -m build
 ```
 
-## License
+## Documentation
 
-MIT License - see [LICENSE](LICENSE) file for details.
+
+
+### For AI Agents
+
+- **[AGENTS.md](AGENTS.md)** - Mandatory workflow for AI agents
+
+- **[Definition of Done](docs/definition-of-done.md)** - Quality standards
+
+- **[Workflows](docs/workflows.md)** - Development workflows
+
+
+
+### For Developers
+
+- **[Documentation Index](docs/README.md)** - Complete documentation navigation
+
+- **[Architecture](docs/architecture.md)** - System architecture
+
+- **[Implementation Reference](docs/implementation-reference.md)** - Code patterns
+
+- **[Contributing](CONTRIBUTING.md)** - Contribution guidelines
+
+
+
+### Examples
+
+- **[Basic Usage](examples/basic_usage.py)** - Simple notification examples
+
+- **[Milestone Notifications](examples/milestone_notifications.py)** - Milestone-based notifications
+
+- **[Humorous Demo](examples/humorous_demo.py)** - Creative demo script
+
+
+
+### Guides
+
+- **[Slack API Setup](docs/slack-api-setup.md)** - Configuring Slack app and tokens
+
+- **[MCP Service Setup](docs/mcp-service-setup.md)** - FastMCP server configuration
+
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues
+
+
+
+---
+
+Last Updated: 2026-02-01
+
+ License - see [LICENSE](LICENSE) file for details.
 
 ## Contributing
 

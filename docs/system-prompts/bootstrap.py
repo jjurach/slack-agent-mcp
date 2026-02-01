@@ -56,10 +56,6 @@ class LinkTransformer:
         if path_part.startswith('/'):
             return link_path, None
 
-        # Only transform relative links starting with ../ or ./
-        if not (path_part.startswith('../') or path_part.startswith('./')):
-            return link_path, None
-
         # Transform the path
         try:
             source_abs = Path(project_root) / source_file
@@ -926,6 +922,7 @@ Last Updated: {timestamp}
 
         # Sections to sync
         sections = [
+            ("MANDATORY-READING", "mandatory-reading.md"),
             ("CORE-WORKFLOW", "workflows/core.md"),
             ("PRINCIPLES", "principles/definition-of-done.md"),
         ]

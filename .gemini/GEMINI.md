@@ -18,4 +18,4 @@ The **[docs/system-prompts/tools/gemini.md](../docs/system-prompts/tools/gemini.
 - Common patterns and examples
 
 ---
-Last Updated: 2026-01-30
+Last Updated: 2026-02-01

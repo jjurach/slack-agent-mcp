@@ -788,7 +788,7 @@ Processes are specialized, one-time or periodic maintenance operations. Located 
 
 ## Project Integration
 
-This Agent Kernel is integrated into the **Second Voice** project with the following extensions:
+This Agent Kernel is integrated into the **Slack Notifications** project with the following extensions:
 
 ### Entry Points
 
@@ -801,23 +801,23 @@ This Agent Kernel is integrated into the **Second Voice** project with the follo
 The project adds domain-specific requirements for:
 
 **Project Type:**
-- CLI Application
-- Audio Processing (AAC, Whisper)
-- Google Gemini Integration
+- Slack Notification Library
+- Model Context Protocol (MCP) Server
+- Slack RTM Agent
 
 **Technology Stack:**
-- Python 3.12+
+- Python 3.10+
 - Pytest
-- SoundDevice
-- Pydub
+- slack-sdk
+- FastMCP
 
 See [docs/definition-of-done.md](../definition-of-done.md) for complete project-specific requirements.
 
 ### Sync Status
 
-- **Bootstrap sync:** Completed 2026-01-29
-- **Last integration update:** 2026-01-29
-- **Sections synchronized:** CORE-WORKFLOW, PRINCIPLES, PYTHON-DOD
+- **Bootstrap sync:** Completed 2026-02-01
+- **Last integration update:** 2026-02-01
+- **Sections synchronized:** CORE-WORKFLOW, PRINCIPLES, PYTHON-DOD, MANDATORY-READING
 
 ### Documentation Structure
 
